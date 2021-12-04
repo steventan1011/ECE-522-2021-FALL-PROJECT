@@ -102,11 +102,7 @@ impl RBTree {
         }
 
         // return the root
-        let parent = node.borrow().parent.clone();
-        match parent {
-            Some(parent) => Some(parent),
-            None => Some(node),
-        }
+        return self.get_root(node);
     }
 
     fn insert_maintain_rb(&self, node: RBTreeNode) {
@@ -601,23 +597,27 @@ impl RBTree {
                 }
 
                 // return the root
-                let parent = node.borrow().parent.clone();
-                match parent {
-                    Some(parent) => Some(parent),
-                    None => Some(node),
-                }
+                return self.get_root(node);
             }
         }
     }
 
     fn delete_maintain_rb(&self, node: RBTreeNode) {}
 
+    fn get_root(&self, node: RBTreeNode) -> OptionRBTreeNode {
+        let parent = node.borrow().parent.clone();
+        match parent {
+            Some(parent) => Some(parent),
+            None => Some(node),
+        }
+    }
+
     fn get_sibling(&self, node: RBTreeNode) -> OptionRBTreeNode {
         // Get the current node's sibling, or None if it does not exist.
         match node.borrow().parent.clone() {
             None => None,
             Some(parent) => {
-                if self.is_left(node) {
+                if self.is_left(node.clone()) {
                     parent.borrow().right.clone()
                 } else {
                     parent.borrow().left.clone()
