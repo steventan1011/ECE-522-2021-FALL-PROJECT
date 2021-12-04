@@ -60,19 +60,19 @@ impl AVLTree {
                 }
                 n
             }
-            None => TreeNode::new(insert_value).unwrap(),            
+            None => TreeNode::new(insert_value).unwrap(),
         };
 
         // update height
         temp_node.borrow_mut().height = self.get_left_height(&temp_node)
-        .max(self.get_right_height(&temp_node)) + 1;
+            .max(self.get_right_height(&temp_node)) + 1;
 
         // update balance factor
         let mut balance_factor = self.get_balance_factor(&temp_node);
         if balance_factor.abs() > 1.0 {
             println!("unbalanced: {}", balance_factor);
         }
-
+        println!("insert node: {}", temp_node.borrow().value.clone());
         Some(temp_node)
     }
 
@@ -92,6 +92,29 @@ impl AVLTree {
         self.get_left_height(n) as f64 - self.get_right_height(n) as f64
     }
 
+    fn get_root(&self) -> &OptionAVLTreeNode {
+        &self.root
+    }
+
+    //Determine whether the tree is balanced
+    fn is_balanced(&self) -> bool {
+        match self.get_root() {
+            Some(node) => self._is_balanced(node), // Incorrect type of parameter
+            None => true,
+        }
+    }
+
+    // Determine whether the tree with node as root is balanced
+    fn _is_balanced(&mut self, node: OptionAVLTreeNode) -> bool {
+        let mut balance_factor = self.get_balance_factor(&node.unwrap());
+        if balance_factor.abs() > 1.0 {
+            false
+        } else {
+            self._is_balanced(node.unwrap().borrow_mut().left.clone()) &&
+                self._is_balanced(node.unwrap().borrow_mut().right.clone())
+        }
+    }
+
 
     // fn delete(&mut self, value: u32) {}
 
@@ -105,11 +128,12 @@ impl AVLTree {
 
 }
 
-    
-// fn main() {
-//     let mut avl_tree = AVLTree::new();
-//     avl_tree.insert(2);
-//     avl_tree.insert(1);
-//     avl_tree.insert(3);
-//     println!("{:#?}", avl_tree.print_inorder());
-// }
+fn main() {
+    let mut avl_tree = AVLTree::new();
+    avl_tree.insert(2);
+    avl_tree.insert(1);
+    avl_tree.insert(3);
+    avl_tree.insert(4);
+    avl_tree.insert(5);
+    //println!("{:#?}", avl_tree);
+}
