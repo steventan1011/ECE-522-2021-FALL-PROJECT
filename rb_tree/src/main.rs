@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-#[derive(Clone, Debug, PartialEq)]
 
+#[derive(Clone, Debug, PartialEq)]
 enum NodeColor {
     Red,
     Black,
@@ -101,11 +101,11 @@ impl RBTree {
             }
         }
 
+        // return the root
         let parent = node.borrow().parent.clone();
-        if parent.is_some() {
-            parent
-        } else {
-            Some(node)
+        match parent {
+            Some(parent) => Some(parent),
+            None => Some(node),
         }
     }
 
@@ -146,12 +146,12 @@ impl RBTree {
                                 parent.clone().borrow().value,
                                 grand_parent.clone().borrow().value
                             );
-                            let grand_parent_borrowed = grand_parent.borrow();
-                            if grand_parent_borrowed.color == NodeColor::Red {
+                            // let grand_parent_borrowed = grand_parent.borrow();
+                            if grand_parent.borrow().color == NodeColor::Red {
                                 panic!("Red violation!");
                             }
                             if self.is_left(parent.clone()) && self.is_left(node.clone()) {
-                                let uncle = grand_parent_borrowed.right.clone();
+                                let uncle = grand_parent.borrow().right.clone();
                                 match uncle {
                                     None => {
                                         // insert case 6.1: left left && uncle is None
@@ -190,7 +190,7 @@ impl RBTree {
                                     }
                                 }
                             } else if self.is_right(parent.clone()) && self.is_right(node.clone()) {
-                                let uncle = grand_parent_borrowed.left.clone();
+                                let uncle = grand_parent.borrow().left.clone();
                                 println!(
                                     "===== else self.is_right(parent.clone()) && self.is_right(node.clone() {:#?} {:#?} {:#?}",
                                     node.borrow().value,
@@ -235,7 +235,7 @@ impl RBTree {
                                     }
                                 }
                             } else if self.is_left(parent.clone()) && self.is_right(node.clone()) {
-                                let uncle = grand_parent_borrowed.right.clone();
+                                let uncle = grand_parent.borrow().right.clone();
                                 match uncle {
                                     None => {
                                         // insert case 5.1: left right  && uncle is None
@@ -247,9 +247,8 @@ impl RBTree {
                                             grand_parent.clone().borrow().value
                                         );
                                         self.left_rotate(parent.clone());
-                                        self.insert_maintain_rb(
-                                            node.borrow().left.clone().unwrap(),
-                                        );
+                                        let left_child = node.borrow().left.clone().unwrap();
+                                        self.insert_maintain_rb(left_child);
                                     }
                                     Some(uncle) => {
                                         println!(
@@ -269,28 +268,26 @@ impl RBTree {
                                                 "insert case 5.1: left right  && uncle is black"
                                             );
                                             self.left_rotate(parent.clone());
-                                            self.insert_maintain_rb(
-                                                node.borrow().left.clone().unwrap(),
-                                            );
+                                            let left_child = node.borrow().left.clone().unwrap();
+                                            self.insert_maintain_rb(left_child);
                                         }
                                     }
                                 }
                             } else if self.is_right(parent.clone()) && self.is_left(node.clone()) {
-                                let uncle = grand_parent_borrowed.right.clone();
+                                let uncle = grand_parent.borrow().left.clone();
                                 println!(
                                     "===== else if self.is_right(parent.clone()) && self.is_left(node.clone() {:#?} {:#?} {:#?}",
                                     node.borrow().value,
                                     parent.clone().borrow().value,
-                                    grand_parent_borrowed.value
+                                    grand_parent.borrow().value
                                 );
                                 match uncle {
                                     None => {
                                         // insert case 5.2: right left && uncle is None
                                         println!("insert case 5.2: right left && uncle is None");
                                         self.right_rotate(parent.clone());
-                                        self.insert_maintain_rb(
-                                            node.borrow().right.clone().unwrap(),
-                                        );
+                                        let right_child = node.borrow().right.clone().unwrap();
+                                        self.insert_maintain_rb(right_child);
                                     }
                                     Some(uncle) => {
                                         println!(
@@ -310,9 +307,8 @@ impl RBTree {
                                                 "insert case 5.2: right left && uncle is black"
                                             );
                                             self.right_rotate(parent.clone());
-                                            self.insert_maintain_rb(
-                                                node.borrow().right.clone().unwrap(),
-                                            );
+                                            let right_child = node.borrow().right.clone().unwrap();
+                                            self.insert_maintain_rb(right_child);
                                         }
                                     }
                                 }
@@ -565,13 +561,26 @@ fn main() {
     // rb_tree.insert(4);
     // rb_tree.insert(5);
 
-    rb_tree.insert(15);
-    rb_tree.insert(17);
-    rb_tree.insert(22);
-    rb_tree.insert(25);
-    rb_tree.insert(27);
+    rb_tree.insert(12);
     rb_tree.insert(1);
+    rb_tree.insert(9);
+    rb_tree.insert(2);
+    rb_tree.insert(0);
+    rb_tree.insert(11);
+    rb_tree.insert(7);
+    rb_tree.insert(19);
+    rb_tree.insert(4);
+    rb_tree.insert(15);
+    rb_tree.insert(18);
+    rb_tree.insert(5);
+    rb_tree.insert(14);
+    rb_tree.insert(13);
+    rb_tree.insert(10);
+    rb_tree.insert(16);
     rb_tree.insert(6);
+    rb_tree.insert(3);
+    rb_tree.insert(8);
+    rb_tree.insert(17);
     let temp = rb_tree.clone();
     temp.preorder_traverse_reconstruct(rb_tree.root.clone().unwrap());
     println!("{:#?}", temp);
