@@ -712,10 +712,10 @@ mod test {
             tree.insert(*v);
         });
         let root = tree.root.clone().unwrap();
-
         let mut container = vec![];
         tree.preorder_traverse(root.clone(), &mut container);
-        println!("check tree  {:#?}", container);
+        let result = isValidRedBlackTree(tree.root);
+        assert_eq!(result, true);
         assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
 
         // let mut container = vec![];
@@ -753,6 +753,26 @@ mod test {
 
         let result = isValidRedBlackTree(rb_tree.root);
         assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_delete() {
+         // Test the three different tree traversal functions.
+         let mut tree = RBTree::new();
+         tree.insert(0);
+         vec![16, 8, 24, 20, 22].iter().for_each(|v| {
+             tree.insert(*v);
+         });
+         
+         let root = tree.root.clone().unwrap();
+         tree.delete(16);
+         let mut container = vec![];
+         tree.preorder_traverse(root.clone(), &mut container);
+         let result = isValidRedBlackTree(tree.root);
+         assert_eq!(result, true);
+         
+         assert_eq!(container, vec![8, 0, 20, 24, 22]);
+ 
     }
 }
 
