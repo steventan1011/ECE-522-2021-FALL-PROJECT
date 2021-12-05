@@ -1093,26 +1093,27 @@ fn main() {
     rb_tree.delete(18);
     rb_tree.delete(5);
     rb_tree.delete(14);
-    // rb_tree.delete(13);
-    // rb_tree.delete(10);
-    // rb_tree.delete(16);
-    // rb_tree.delete(6);
-    // rb_tree.delete(3);
-    // rb_tree.delete(8);
+    rb_tree.delete(13);
+    rb_tree.delete(10);
+    rb_tree.delete(16);
+    rb_tree.delete(6);
+    rb_tree.delete(3);
+    rb_tree.delete(8);
     // rb_tree.delete(17);
     let temp = rb_tree.clone();
-    temp.preorder_traverse_reconstruct(rb_tree.root.clone().unwrap());
-    println!("{:#?}", temp);
-    let container: &mut Vec<String> = &mut vec![];
-    rb_tree
-        .clone()
-        .preorder_traverse(rb_tree.root.clone().unwrap(), container);
-    println!("preorder: {:?}", container);
-    let container: &mut Vec<String> = &mut vec![];
-    rb_tree
-        .clone()
-        .inorder_traverse(rb_tree.root.clone().unwrap(), container);
-    println!("inorder: {:?}", container);
+    match rb_tree.root.clone() {
+        None => (),
+        Some(root) => {
+            temp.preorder_traverse_reconstruct(root.clone());
+            println!("{:#?}", temp);
+            let container: &mut Vec<String> = &mut vec![];
+            rb_tree.clone().preorder_traverse(root.clone(), container);
+            println!("preorder: {:?}", container);
+            let container: &mut Vec<String> = &mut vec![];
+            rb_tree.clone().inorder_traverse(root.clone(), container);
+            println!("inorder: {:?}", container);
+        }
+    }
 
     rb_tree.in_order_traversal();
     println!("Count leaves: {:?}", rb_tree.count_leaves());
