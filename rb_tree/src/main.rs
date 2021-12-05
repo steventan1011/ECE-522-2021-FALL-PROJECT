@@ -571,7 +571,7 @@ impl RBTree {
                                     return None;
                                 } else {
                                     // 4.2 current node has parent, then call delete_maintain_rb
-                                    // and delete the link between current node and its parent
+                                    // and then delete the link between current node and its parent
                                     self.delete_maintain_rb(node.clone());
                                     let parent = node.borrow().parent.clone().unwrap();
                                     if self.is_left(node.clone()) {
@@ -607,7 +607,7 @@ impl RBTree {
     fn get_root(&self, node: RBTreeNode) -> OptionRBTreeNode {
         let parent = node.borrow().parent.clone();
         match parent {
-            Some(parent) => Some(parent),
+            Some(_) => parent,
             None => Some(node),
         }
     }
