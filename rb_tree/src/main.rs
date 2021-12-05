@@ -72,17 +72,20 @@ impl RBTree {
         }
     }
 
-    // fn height(&self) -> u32 {}
+    fn height(&self) -> u32 {}
 
+    // inorder traverse
     fn in_order_traversal(&self) {
+        print!("Inorder traversal:");
         match self.root.clone() {
-            None => return,
+            None => print!("the tree does not have node"),
             Some(root) => TreeNode::in_order_traversal(root),
         }
     }
 
     // fn is_tree_empty(&self) -> bool {}
 
+    // 下面这三个之后会不要，用上面的in_order_traversal
     fn preorder_traverse(&self, node: RBTreeNode, container: &mut Vec<String>) {
         container.push(node.borrow().value.to_string() + node.borrow().color.to_string());
         let left = node.borrow().left.clone();
@@ -137,9 +140,21 @@ impl TreeNode<u32> {
             p_value: 0,
         }
     }
+
     fn new_with_parent(value: u32, parent: OptionRBTreeNode) -> Self {
         TreeNode {
             color: NodeColor::Red,
+            value: value,
+            parent: parent,
+            left: None,
+            right: None,
+            p_value: 0,
+        }
+    }
+
+    fn new_black_with_parent(value: u32, parent: OptionRBTreeNode) -> Self {
+        TreeNode {
+            color: NodeColor::Black,
             value: value,
             parent: parent,
             left: None,
@@ -807,6 +822,207 @@ impl TreeNode<u32> {
         if right.is_some() {
             Self::in_order_traversal(right.unwrap());
         }
+    }
+}
+
+fn calculate_black_height(node: OptionRBTreeNode) -> Option<usize> {
+    match node {
+        None => Some(1),
+        Some(node) => {
+            let left_height = calculate_black_height(node.borrow().left.clone());
+            let right_height = calculate_black_height(node.borrow().right.clone());
+
+            match (left_height, right_height) {
+                (Some(left_height), Some(right_height)) => {
+                    if left_height != right_height {
+                        //The 2 children have unequal depths
+                        None
+                    } else {
+                        let node_color = &node.borrow().color;
+                        //Return the black depth of children,plus 1 if the node is black
+                        match node_color {
+                            NodeColor::Red => Some(left_height),
+                            NodeColor::Black => Some(left_height + 1),
+                        }
+                    }
+                }
+                _ => None,
+            }
+        }
+    }
+}
+
+fn isValidRedBlackTree(root: OptionRBTreeNode) -> bool {
+    let result = calculate_black_height(root);
+    match result {
+        Some(_) => true,
+        None => false,
+    }
+}
+
+fn is_equal(left: OptionRBTreeNode, right: OptionRBTreeNode) -> bool {
+    match (left, right) {
+        (None, None) => true,
+        (Some(_), None) | (None, Some(_)) => false,
+        (Some(left), Some(right)) => {
+            let left_data = left.borrow().value;
+            let right_data = right.borrow().value;
+            //Test if 2 trees are equal
+            if left_data == right_data {
+                let left_left = left.borrow().left.clone();
+                let left_right = left.borrow().right.clone();
+                let right_left = right.borrow().left.clone();
+                let right_right = right.borrow().right.clone();
+                is_equal(left_left, right_left) && is_equal(left_right, right_right)
+            } else {
+                false
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rand::seq::SliceRandom;
+    use rand::{rngs::StdRng, SeedableRng};
+
+    #[test]
+    fn test_rotation() {
+        let mut tree = RBTree::new();
+        tree.insert(30);
+        {
+            let root = tree.root.clone().unwrap();
+            root.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                20,
+                Some(root.clone()),
+            ))));
+            root.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                40,
+                Some(root.clone()),
+            ))));
+
+            let left = root.borrow().left.clone().unwrap();
+            left.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                10,
+                Some(left.clone()),
+            ))));
+            left.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                25,
+                Some(left.clone()),
+            ))));
+
+            let right = root.borrow().right.clone().unwrap();
+            right.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                35,
+                Some(right.clone()),
+            ))));
+            right.borrow_mut().right = Some(Rc::new(RefCell::new(
+                TreeNode::new_black_with_parent(50, Some(right.clone())),
+            )));
+        }
+        let mut after_left_rot = RBTree::new();
+        after_left_rot.insert(40);
+        {
+            let root = after_left_rot.root.clone().unwrap();
+            root.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                30,
+                Some(root.clone()),
+            ))));
+
+            let left = root.borrow().left.clone().unwrap();
+            left.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                20,
+                Some(left.clone()),
+            ))));
+            left.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                35,
+                Some(left.clone()),
+            ))));
+
+            let left = left.borrow().left.clone().unwrap();
+            left.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                10,
+                Some(left.clone()),
+            ))));
+            left.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                25,
+                Some(root.clone()),
+            ))));
+
+            root.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
+                50,
+                Some(root.clone()),
+            ))));
+        }
+        // {
+        //     let root = tree.root.clone().unwrap();
+        //     tree.left_rotate(root);
+        // }
+        let mut tree_container = vec![];
+        let mut left_rotate_container = vec![];
+        tree.preorder_traverse(tree.root.clone().unwrap(), &mut tree_container);
+        after_left_rot.preorder_traverse(
+            after_left_rot.root.clone().unwrap(),
+            &mut left_rotate_container,
+        );
+        println!(
+            "check tree {:#?} {:#?}",
+            tree_container, left_rotate_container
+        );
+        assert!(is_equal(tree.root, after_left_rot.root))
+    }
+
+    #[test]
+    fn tree_traversal() {
+        // Test the three different tree traversal functions.
+        let mut tree = RBTree::new();
+        tree.insert(0);
+        vec![16, 16, 8, 24, 20, 22].iter().for_each(|v| {
+            tree.insert(*v);
+        });
+        let root = tree.root.clone().unwrap();
+
+        let mut container = vec![];
+        tree.preorder_traverse(root.clone(), &mut container);
+        println!("check tree  {:#?}", container);
+        assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
+
+        // let mut container = vec![];
+        // RedBlackTreeNode::preorder_traverse(root.clone(), &mut container);
+        // assert_eq!(container, vec![0, -16, 16, 8, 22, 20, 24]);
+
+        // let mut container = vec![];
+        // RedBlackTreeNode::postorder_traverse(root, &mut container);
+        // assert_eq!(container, vec![-16, 8, 20, 24, 22, 16, 0]);
+    }
+
+    #[test]
+    fn test_insert() {
+        let mut rb_tree = RBTree::new();
+        rb_tree.insert(12);
+        rb_tree.insert(1);
+        rb_tree.insert(9);
+        rb_tree.insert(2);
+        rb_tree.insert(0);
+        rb_tree.insert(11);
+        rb_tree.insert(7);
+        rb_tree.insert(19);
+        rb_tree.insert(4);
+        rb_tree.insert(15);
+        rb_tree.insert(18);
+        rb_tree.insert(5);
+        rb_tree.insert(14);
+        rb_tree.insert(13);
+        rb_tree.insert(10);
+        rb_tree.insert(16);
+        rb_tree.insert(6);
+        rb_tree.insert(3);
+        rb_tree.insert(8);
+        rb_tree.insert(17);
+
+        let result = isValidRedBlackTree(rb_tree.root);
+        assert_eq!(result, true);
     }
 }
 
