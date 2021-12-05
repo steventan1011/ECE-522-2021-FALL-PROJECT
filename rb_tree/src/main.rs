@@ -66,17 +66,19 @@ impl RBTree {
         self.root = result;
     }
 
+    // count the leaves (None nodes)
     fn count_leaves(&self) -> u32 {
         match self.root.clone() {
             None => 0,
-            Some(root) => TreeNode::count_leaves(root),
+            Some(node) => TreeNode::count_leaves(node),
         }
     }
 
+    // from root to leaves
     fn height(&self) -> u32 {
         match self.root.clone() {
             None => 0,
-            Some(node) => TreeNode::get_height(root),
+            Some(node) => TreeNode::get_height(node),
         }
     }
 
@@ -90,7 +92,10 @@ impl RBTree {
         println!()
     }
 
-    // fn is_tree_empty(&self) -> bool {}
+    // judge if the tree is empty
+    fn is_tree_empty(&self) -> bool {
+        self.root.clone().map(|_| false).unwrap_or(true)
+    }
 
     // 下面这三个之后会不要，用上面的in_order_traversal
     fn preorder_traverse(&self, node: RBTreeNode, container: &mut Vec<String>) {
@@ -849,7 +854,7 @@ impl TreeNode<u32> {
         let left = node.borrow().left.clone();
         let right = node.borrow().right.clone();
         let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
-        let right_height = left.map(|r| Self::get_height(r.clone())).unwrap_or(1);
+        let right_height = right.map(|r| Self::get_height(r.clone())).unwrap_or(1);
         return max(left_height, right_height) + 1;
     }
 
@@ -1111,4 +1116,6 @@ fn main() {
 
     rb_tree.in_order_traversal();
     println!("Count leaves: {:?}", rb_tree.count_leaves());
+    println!("Height: {:?}", rb_tree.height());
+    println!("Is empty: {:?}", rb_tree.is_tree_empty());
 }
