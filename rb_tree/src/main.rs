@@ -62,8 +62,13 @@ impl RBTree {
 
     fn delete(&mut self, delete_value: u32) {
         let root = self.root.clone();
-        let result = TreeNode::node_delete(root, delete_value);
-        self.root = result;
+        match root {
+            None => (),
+            Some(root) => {
+                let result = TreeNode::node_delete(root, delete_value);
+                self.root = result;
+            }
+        }
     }
 
     // count the leaves (None nodes)
@@ -422,146 +427,141 @@ impl TreeNode<u32> {
         }
     }
 
-    fn node_delete(node: OptionRBTreeNode, delete_value: u32) -> OptionRBTreeNode {
-        match node {
-            None => None,
-            Some(node) => {
-                if node.borrow().value > delete_value {
-                    let left_child = node.borrow().left.clone();
-                    if left_child.is_some() {
-                        Self::node_delete(left_child, delete_value);
+    fn node_delete(node: RBTreeNode, delete_value: u32) -> OptionRBTreeNode {
+        if node.borrow().value > delete_value {
+            let left_child = node.borrow().left.clone();
+            if left_child.is_some() {
+                Self::node_delete(left_child.unwrap(), delete_value);
+            }
+        } else if node.borrow().value < delete_value {
+            let right_child = node.borrow_mut().right.clone();
+            if right_child.is_some() {
+                Self::node_delete(right_child.unwrap(), delete_value);
+            }
+        } else {
+            let left = node.borrow_mut().left.clone();
+            let right = node.borrow_mut().right.clone();
+            // 1. Two children case: current node has two children
+            // if current node has two children, then recursively replace it with the min value of right
+            // delete the min value of right in the right tree
+            // the goal is to make the problem to be the case where current node has only one child
+            if left.is_some() && right.is_some() {
+                let min_of_right = Self::get_min_value_in_children(right.clone().unwrap());
+                node.borrow_mut().value = min_of_right;
+                Self::node_delete(right.unwrap(), min_of_right);
+            }
+            // current node has one child or no child
+            else {
+                // 2. Red case: current node is red
+                // it means that current node has no child, just delete this node
+                if node.borrow().color == NodeColor::Red {
+                    let parent = node.borrow().parent.clone().unwrap();
+                    if Self::is_left(node.clone()) {
+                        parent.borrow_mut().left = None;
+                    } else {
+                        parent.borrow_mut().right = None;
                     }
-                } else if node.borrow().value < delete_value {
-                    let right_child = node.borrow_mut().right.clone();
-                    if right_child.is_some() {
-                        Self::node_delete(right_child, delete_value);
-                    }
-                } else {
-                    let left = node.borrow_mut().left.clone();
-                    let right = node.borrow_mut().right.clone();
-                    // 1. Two children case: current node has two children
-                    // if current node has two children, then recursively replace it with the min value of right
-                    // delete the min value of right in the right tree
-                    // the goal is to make the problem to be the case where current node has only one child
-                    if left.is_some() && right.is_some() {
-                        let min_of_right = Self::get_min_value_in_children(right.clone().unwrap());
-                        node.borrow_mut().value = min_of_right;
-                        Self::node_delete(right, min_of_right);
-                    }
-                    // current node has one child or no child
-                    else {
-                        // 2. Red case: current node is red
-                        // it means that current node has no child, just delete this node
-                        if node.borrow().color == NodeColor::Red {
-                            let parent = node.borrow().parent.clone().unwrap();
-                            if Self::is_left(node.clone()) {
-                                parent.borrow_mut().left = None;
-                            } else {
-                                parent.borrow_mut().right = None;
+                }
+                // current node is black
+                else {
+                    // 3.1 Black + left red case: current node is black and left child is red, right child is None
+                    // delete the current black node and move the left child to the current node place
+                    if left.is_some() && right.is_none() {
+                        let left = left.unwrap();
+                        // TODO
+                        // node.parent.child = left, left.parent = node.parent
+                        let parent = node.borrow().parent.clone();
+                        match parent {
+                            None => {
+                                left.borrow_mut().color = node.borrow().color.clone();
+                                left.borrow_mut().parent = None;
+                                return Some(left);
+                            }
+                            Some(parent) => {
+                                if Self::is_left(node.clone()) {
+                                    parent.borrow_mut().left = Some(left.clone());
+                                    left.borrow_mut().parent = Some(parent.clone());
+                                    left.borrow_mut().color = node.borrow().color.clone();
+                                } else {
+                                    parent.borrow_mut().right = Some(left.clone());
+                                    left.borrow_mut().parent = Some(parent.clone());
+                                    left.borrow_mut().color = node.borrow().color.clone();
+                                }
                             }
                         }
-                        // current node is black
-                        else {
-                            // 3.1 Black + left red case: current node is black and left child is red, right child is None
-                            // delete the current black node and move the left child to the current node place
-                            if left.is_some() && right.is_none() {
-                                let left = left.unwrap();
-                                // TODO
-                                // node.parent.child = left, left.parent = node.parent
-                                let parent = node.borrow().parent.clone();
-                                match parent {
-                                    None => {
-                                        left.borrow_mut().color = node.borrow().color.clone();
-                                        left.borrow_mut().parent = None;
-                                        return Some(left);
-                                    }
-                                    Some(parent) => {
-                                        if Self::is_left(node.clone()) {
-                                            parent.borrow_mut().left = Some(left.clone());
-                                            left.borrow_mut().parent = Some(parent.clone());
-                                            left.borrow_mut().color = node.borrow().color.clone();
-                                        } else {
-                                            parent.borrow_mut().right = Some(left.clone());
-                                            left.borrow_mut().parent = Some(parent.clone());
-                                            left.borrow_mut().color = node.borrow().color.clone();
-                                        }
-                                    }
-                                }
 
-                                // node.borrow_mut().value = left.borrow().value;
-                                // node.borrow_mut().left = left.borrow().left.clone();
-                                // node.borrow_mut().right = left.borrow().right.clone();
-                                // if node.borrow().left.is_some() {
-                                //     let left = node.borrow().left.clone().unwrap();
-                                //     left.borrow_mut().parent = Some(node.clone());
-                                // }
-                                // if node.borrow().right.is_some() {
-                                //     let right = node.borrow().right.clone().unwrap();
-                                //     right.borrow_mut().parent = Some(node.clone());
-                                // }
+                        // node.borrow_mut().value = left.borrow().value;
+                        // node.borrow_mut().left = left.borrow().left.clone();
+                        // node.borrow_mut().right = left.borrow().right.clone();
+                        // if node.borrow().left.is_some() {
+                        //     let left = node.borrow().left.clone().unwrap();
+                        //     left.borrow_mut().parent = Some(node.clone());
+                        // }
+                        // if node.borrow().right.is_some() {
+                        //     let right = node.borrow().right.clone().unwrap();
+                        //     right.borrow_mut().parent = Some(node.clone());
+                        // }
+                    }
+                    // 3.2 Black + right red case: current node is black and right child is red, left child is None
+                    // delete the current black node and move the right child to the current node place
+                    else if left.is_none() && right.is_some() {
+                        let right = right.unwrap();
+                        let parent = node.borrow().parent.clone();
+                        match parent {
+                            None => {
+                                right.borrow_mut().color = node.borrow().color.clone();
+                                right.borrow_mut().parent = None;
+                                return Some(right);
                             }
-                            // 3.2 Black + right red case: current node is black and right child is red, left child is None
-                            // delete the current black node and move the right child to the current node place
-                            else if left.is_none() && right.is_some() {
-                                let right = right.unwrap();
-                                let parent = node.borrow().parent.clone();
-                                match parent {
-                                    None => {
-                                        right.borrow_mut().color = node.borrow().color.clone();
-                                        right.borrow_mut().parent = None;
-                                        return Some(right);
-                                    }
-                                    Some(parent) => {
-                                        if Self::is_left(node.clone()) {
-                                            parent.borrow_mut().left = Some(right.clone());
-                                            right.borrow_mut().parent = Some(parent.clone());
-                                            right.borrow_mut().color = node.borrow().color.clone();
-                                        } else {
-                                            parent.borrow_mut().right = Some(right.clone());
-                                            right.borrow_mut().parent = Some(parent.clone());
-                                            right.borrow_mut().color = node.borrow().color.clone();
-                                        }
-                                    }
+                            Some(parent) => {
+                                if Self::is_left(node.clone()) {
+                                    parent.borrow_mut().left = Some(right.clone());
+                                    right.borrow_mut().parent = Some(parent.clone());
+                                    right.borrow_mut().color = node.borrow().color.clone();
+                                } else {
+                                    parent.borrow_mut().right = Some(right.clone());
+                                    right.borrow_mut().parent = Some(parent.clone());
+                                    right.borrow_mut().color = node.borrow().color.clone();
                                 }
-                                // node.borrow_mut().value = right.borrow().value;
-                                // node.borrow_mut().left = right.borrow().left.clone();
-                                // node.borrow_mut().right = right.borrow().right.clone();
-                                // if node.borrow().left.is_some() {
-                                //     let left = node.borrow().left.clone().unwrap();
-                                //     left.borrow_mut().parent = Some(node.clone());
-                                // }
-                                // if node.borrow().right.is_some() {
-                                //     let right = node.borrow().right.clone().unwrap();
-                                //     right.borrow_mut().parent = Some(node.clone());
-                                // }
                             }
-                            // 4. Black + no children case: current node is black and has no children
-                            else {
-                                let parent = node.borrow().parent.clone();
-                                match parent {
-                                    // 4.1 current node is the root, then return None
-                                    None => return None,
-                                    // 4.2 current node has parent, then call delete_maintain_rb
-                                    // and then delete the link between current node and its parent
-                                    Some(parent) => {
-                                        Self::delete_maintain_rb(node.clone());
-                                        if Self::is_left(node.clone()) {
-                                            parent.borrow_mut().left = None;
-                                        } else {
-                                            parent.borrow_mut().right = None;
-                                        }
-                                        node.borrow_mut().parent = None;
-                                    }
+                        }
+                        // node.borrow_mut().value = right.borrow().value;
+                        // node.borrow_mut().left = right.borrow().left.clone();
+                        // node.borrow_mut().right = right.borrow().right.clone();
+                        // if node.borrow().left.is_some() {
+                        //     let left = node.borrow().left.clone().unwrap();
+                        //     left.borrow_mut().parent = Some(node.clone());
+                        // }
+                        // if node.borrow().right.is_some() {
+                        //     let right = node.borrow().right.clone().unwrap();
+                        //     right.borrow_mut().parent = Some(node.clone());
+                        // }
+                    }
+                    // 4. Black + no children case: current node is black and has no children
+                    else {
+                        let parent = node.borrow().parent.clone();
+                        match parent {
+                            // 4.1 current node is the root, then return None
+                            None => return None,
+                            // 4.2 current node has parent, then call delete_maintain_rb
+                            // and then delete the link between current node and its parent
+                            Some(parent) => {
+                                Self::delete_maintain_rb(node.clone());
+                                if Self::is_left(node.clone()) {
+                                    parent.borrow_mut().left = None;
+                                } else {
+                                    parent.borrow_mut().right = None;
                                 }
+                                node.borrow_mut().parent = None;
                             }
                         }
                     }
                 }
-
-                // return the root
-                return Self::get_root(node);
             }
         }
+
+        // return the root
+        return Self::get_root(node);
     }
 
     fn delete_maintain_rb(node: RBTreeNode) {
