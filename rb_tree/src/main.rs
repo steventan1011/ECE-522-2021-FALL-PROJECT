@@ -65,7 +65,12 @@ impl RBTree {
         self.root = result;
     }
 
-    // fn count_leaves(&self) -> u32 {}
+    fn count_leaves(&self) -> u32 {
+        match self.root.clone() {
+            None => 0,
+            Some(root) => TreeNode::count_leaves(root),
+        }
+    }
 
     // fn height(&self) -> u32 {}
 
