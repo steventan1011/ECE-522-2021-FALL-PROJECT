@@ -13,6 +13,21 @@ enum NodeDirection {
     Right,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct RBTree {
+    root: OptionRBTreeNode,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct TreeNode<T> {
+    pub color: NodeColor,
+    pub value: T,
+    pub parent: OptionRBTreeNode,
+    left: OptionRBTreeNode,
+    right: OptionRBTreeNode,
+    pub p_value: T,
+}
+
 type RBTreeNode = Rc<RefCell<TreeNode<u32>>>;
 type OptionRBTreeNode = Option<RBTreeNode>;
 
@@ -24,16 +39,6 @@ impl NodeColor {
             "b"
         }
     }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-struct TreeNode<T> {
-    pub color: NodeColor,
-    pub value: T,
-    pub parent: OptionRBTreeNode,
-    left: OptionRBTreeNode,
-    right: OptionRBTreeNode,
-    pub p_value: T,
 }
 
 // RBTree
@@ -64,7 +69,12 @@ impl RBTree {
 
     // fn height(&self) -> u32 {}
 
-    // fn in_order_traversal(&self) {}
+    fn in_order_traversal(&self) {
+        match self.root.clone() {
+            None => return,
+            Some(root) => TreeNode::in_order_traversal(root),
+        }
+    }
 
     // fn is_tree_empty(&self) -> bool {}
 
@@ -781,11 +791,18 @@ impl TreeNode<u32> {
             Some(node) => node.borrow().color.clone(),
         }
     }
-}
 
-#[derive(Clone, Debug, PartialEq)]
-struct RBTree {
-    root: OptionRBTreeNode,
+    fn in_order_traversal(node: RBTreeNode) {
+        let left = node.borrow().left.clone();
+        if left.is_some() {
+            Self::in_order_traversal(left.unwrap());
+        }
+        print!("{:?} ", node.borrow().value);
+        let right = node.borrow().right.clone();
+        if right.is_some() {
+            Self::in_order_traversal(right.unwrap());
+        }
+    }
 }
 
 fn main() {
@@ -844,4 +861,6 @@ fn main() {
         .clone()
         .inorder_traverse(rb_tree.root.clone().unwrap(), container);
     println!("inorder: {:?}", container);
+
+    rb_tree.in_order_traversal();
 }
