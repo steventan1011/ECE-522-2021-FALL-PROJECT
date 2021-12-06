@@ -98,13 +98,13 @@ impl AVLTree {
 
         // case LR: left rotate + right rotate
         if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) < 0.0 {
-            ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.unwrap())); // 发生移动
+            ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
             return Some(self.right_rotate(ret_node))
         }
 
         // case RL: right rotate + left rotate
         if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) > 0.0 {
-            ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.unwrap())); // 发生移动
+            ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
             return Some(self.left_rotate(ret_node))
         }
         Some(ret_node)
@@ -113,7 +113,7 @@ impl AVLTree {
     fn delete(&mut self, delete_value: u32) {
         let root = self.root.take();
         match root {
-            None => return, // nothing happened??? or return
+            None => return, // 这棵树是空的，没办法delete，所以什么都没发生??? 还是应该返回null？？？？？？？
             Some(n) => self.root = self.node_delete(Some(n), delete_value),
         }
     }
@@ -121,7 +121,7 @@ impl AVLTree {
     // delete node, return new root
     fn node_delete(&mut self, node: OptionAVLTreeNode, delete_value: u32) -> OptionAVLTreeNode {
         let ret_node = match node {
-            None => node.unwrap(), // Traversal to the leaf node, still not found, return null？？？
+            None => node.unwrap(), // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
             Some(mut n) => {
                 let node_value = n.borrow().value;
                 if delete_value < node_value  { // look left
@@ -161,7 +161,7 @@ impl AVLTree {
         };
 
         // update and maintain
-        match Some(ret_node) {
+        match Some(ret_node.clone()) {
             None => Some(ret_node),
             Some(n) => {
                 // update height
@@ -187,13 +187,13 @@ impl AVLTree {
 
                 // case LR: left rotate + right rotate
                 if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) < 0.0 {
-                    ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.unwrap())); // 发生移动
+                    ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
                     return Some(self.right_rotate(ret_node))
                 }
 
                 // case RL: right rotate + left rotate
                 if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) > 0.0 {
-                    ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.unwrap())); // 发生移动
+                    ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
                     return Some(self.left_rotate(ret_node))
                 }
                 Some(ret_node)
@@ -257,7 +257,7 @@ impl AVLTree {
         let mut T3 = x.borrow().right.clone().unwrap();
 
         // right rotate
-        x.borrow_mut().right = Some(y);
+        x.borrow_mut().right = Some(y.clone());
         y.borrow_mut().left = Some(T3); // 借用了发生移动的y
 
         // update height of x and y
@@ -281,7 +281,7 @@ impl AVLTree {
         let mut T2 = x.borrow().left.clone().unwrap();
 
         // left rotate
-        x.borrow_mut().left = Some(y);
+        x.borrow_mut().left = Some(y.clone());
         y.borrow_mut().right = Some(T2); // 借用了发生移动的y
 
         // update height of x and y
