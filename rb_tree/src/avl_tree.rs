@@ -24,6 +24,7 @@ impl TreeNode<u32> {
             height: 1, // default height of a new node is 1，which is a leave
         })))
     }
+
     fn get_left(&self) -> &OptionAVLTreeNode { return &self.left; }
     fn get_right(&self) -> &OptionAVLTreeNode { return &self.right; }
     fn get_data(&self) -> u32 { return self.value; }
@@ -33,6 +34,41 @@ impl TreeNode<u32> {
             self.get_data(),
             |x| x.borrow_mut().min()
         )
+    }
+
+    fn count_leaves(node: AVLTreeNode) -> u32 {
+        let left = node.borrow().left.clone();
+        let right = node.borrow().right.clone();
+        if left.is_none() && right.is_none() {
+            2
+        } else if left.is_none() && right.is_some() {
+            Self::count_leaves(right.clone().unwrap())
+        } else if left.is_some() && right.is_none() {
+            Self::count_leaves(left.clone().unwrap())
+        } else {
+            Self::count_leaves(left.clone().unwrap()) + Self::count_leaves(right.clone().unwrap())
+        }
+    }
+
+    // Node有height属性，可以简化？
+    fn get_height(node: AVLTreeNode) -> u32 {
+        let left = node.borrow().left.clone();
+        let right = node.borrow().right.clone();
+        let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
+        let right_height = right.map(|r| Self::get_height(r.clone())).unwrap_or(1);
+        return max(left_height, right_height) + 1;
+    }
+
+    fn in_order_traversal(node: AVLTreeNode) {
+        let left = node.borrow().left.clone();
+        if left.is_some() {
+            Self::in_order_traversal(left.unwrap());
+        }
+        print!("{:?} ", node.borrow().value);
+        let right = node.borrow().right.clone();
+        if right.is_some() {
+            Self::in_order_traversal(right.unwrap());
+        }
     }
 }
 
@@ -46,6 +82,39 @@ impl AVLTree {
             root: None,
         }
     }
+
+    // count the leaves (None nodes)
+    fn count_leaves(&self) -> u32 {
+        match self.root.clone() {
+            None => 0,
+            Some(node) => TreeNode::count_leaves(node),
+        }
+    }
+
+    // from root to leaves
+    fn height(&self) -> u32 {
+        match self.root.clone() {
+            None => 0,
+            Some(node) => TreeNode::get_height(node),
+        }
+    }
+
+    // inorder traverse
+    fn in_order_traversal(&self) {
+        print!("Inorder traversal: ");
+        match self.root.clone() {
+            None => print!("the tree does not have node"),
+            Some(root) => TreeNode::in_order_traversal(root),
+        }
+        println!()
+    }
+
+    // judge if the tree is empty
+    fn is_tree_empty(&self) -> bool {
+        self.root.clone().map(|_| false).unwrap_or(true)
+    }
+
+
     fn insert(&mut self, insert_value: u32) {
         let root = self.root.take();
         // TreeNode is type OptionAVLTreeNode, so the code is simplified.
@@ -292,23 +361,18 @@ impl AVLTree {
 
         return x
     }
-
-    // fn count_leaves(&self) -> u32 {}
-
-    // fn height(&self) -> u32 {}
-
-    // fn in_order_traversal(&self) {}
-
-    // fn is_tree_empty(&self) -> bool {}
-
 }
 
-// fn main() {
-//     let mut avl_tree = AVLTree::new();
-//     avl_tree.insert(2);
-//     avl_tree.insert(1);
-//     avl_tree.insert(3);
-//     avl_tree.insert(4);
-//     avl_tree.insert(5);
-//     //println!("{:#?}", avl_tree);
-// }
+fn main() {
+    let mut avl_tree = AVLTree::new();
+    avl_tree.insert(2);
+    avl_tree.insert(1);
+    avl_tree.insert(3);
+    // avl_tree.insert(4);
+    // avl_tree.insert(5);
+
+    avl_tree.in_order_traversal();
+    println!("Count leaves: {:?}", avl_tree.count_leaves());
+    println!("Height: {:?}", avl_tree.height());
+    println!("Is empty: {:?}", avl_tree.is_tree_empty());
+}
