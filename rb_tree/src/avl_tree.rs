@@ -198,29 +198,66 @@ impl AVLTree {
     // delete node, return new root
     fn node_delete(&mut self, node: OptionAVLTreeNode, delete_value: u32) -> OptionAVLTreeNode {
         let ret_node = match node {
-            None => node.unwrap(), // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
+            // None => node.unwrap(), // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
+            // Some(mut n) => {
+            //     let node_value = n.borrow().value;
+            //     if delete_value < node_value  { // look left
+            //         let left = n.borrow().left.clone();
+            //         n.borrow_mut().left = self.node_delete(left, delete_value);
+            //         n
+            //     }
+            //     else if delete_value > node_value { // look right
+            //         let right = n.borrow().right.clone();
+            //         n.borrow_mut().right = self.node_delete(right, delete_value);
+            //         n
+            //     }
+            //     else { // found the node which should be deleted
+            //         let left = n.borrow().left.clone();
+            //         let right = n.borrow().right.clone();
+            //         let ret = match (left.clone(), right.clone()) {
+            //             (None, Some(r)) => r,  // The left subtree of the node to be deleted is empty, r is new root
+            //             (Some(l), None) => l, // The right subtree of the node to be deleted is empty, l is new root
+            //
+            //             // 我想通过左子树为空/右子树为空/左右都不为空，这三种情况进行分类，但是缺少左右子树都为空
+            //             // 如果把(None, Some(r)) => r，改成(None, _) => right.unwrap()???，或者改成(_, Some(r)) => r???
+            //             (None, None) => None.unwrap(),
+            //
+            //             //The left and right subtrees of the node to be deleted(node n) are not empty.
+            //             // Find the smallest node A that is larger than the node n.
+            //             (Some(left), Some(right)) => {
+            //                 let min_value = right.borrow().min(); // Find the value of node A which is the minimum value of the right subtree
+            //                 n.borrow_mut().value = min_value; // Change the value of node n to the value of node A.
+            //                 let right = n.borrow().right.clone().take();
+            //                 n.borrow_mut().right = self.node_delete(right, min_value); // Delete the node A in the right subtree.
+            //                 n // return new root
+            //             },
+            //         };
+            //         ret
+            //     }
+            // },
+            None => node, // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
             Some(mut n) => {
                 let node_value = n.borrow().value;
                 if delete_value < node_value  { // look left
                     let left = n.borrow().left.clone();
                     n.borrow_mut().left = self.node_delete(left, delete_value);
-                    n
+                    Some(n) // 返回option
                 }
                 else if delete_value > node_value { // look right
                     let right = n.borrow().right.clone();
                     n.borrow_mut().right = self.node_delete(right, delete_value);
-                    n
+                    Some(n) // 返回option
                 }
                 else { // found the node which should be deleted
                     let left = n.borrow().left.clone();
                     let right = n.borrow().right.clone();
                     let ret = match (left.clone(), right.clone()) {
-                        (None, Some(r)) => r,  // The left subtree of the node to be deleted is empty, r is new root
-                        (Some(l), None) => l, // The right subtree of the node to be deleted is empty, l is new root
+                        (None, Some(r)) => Some(r),  // The left subtree of the node to be deleted is empty, r is new root
+                        (Some(l), None) => Some(l), // The right subtree of the node to be deleted is empty, l is new root
 
                         // 我想通过左子树为空/右子树为空/左右都不为空，这三种情况进行分类，但是缺少左右子树都为空
                         // 如果把(None, Some(r)) => r，改成(None, _) => right.unwrap()???，或者改成(_, Some(r)) => r???
-                        (None, None) => None.unwrap(),
+                        (None, None) => None,
 
                         //The left and right subtrees of the node to be deleted(node n) are not empty.
                         // Find the smallest node A that is larger than the node n.
@@ -229,59 +266,59 @@ impl AVLTree {
                             n.borrow_mut().value = min_value; // Change the value of node n to the value of node A.
                             let right = n.borrow().right.clone().take();
                             n.borrow_mut().right = self.node_delete(right, min_value); // Delete the node A in the right subtree.
-                            n // return new root
+                            Some(n) // return new root
                         },
                     };
-                    ret
+                    ret // 返回option
                 }
             },
         };
 
         // update and maintain
-        match Some(ret_node.clone()) {
-            None => Some(ret_node),
+        match ret_node {
+            None => ret_node,
             Some(n) => {
                 // update height
-                ret_node.borrow_mut().height = self.get_left_height(&ret_node) // 借用了发生移动的
-                    .max(self.get_right_height(&ret_node)) + 1;
+                n.borrow_mut().height = self.get_left_height(&n) // 借用了发生移动的
+                    .max(self.get_right_height(&n)) + 1; // 把option类型的ret_node都改成了n
 
                 // update balance factor
-                let mut balance_factor = self.get_balance_factor(&ret_node);
-                if balance_factor.abs() > 1.0 {
-                    println!("unbalanced: {}", balance_factor);
-                }
+                let mut balance_factor = self.get_balance_factor(&n);
+                // if balance_factor.abs() > 1.0 {
+                //     println!("unbalanced: {}", balance_factor);
+                // }
 
                 // maintain
                 // case LL: right rotate
-                if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) >= 0.0 {
-                    return Some(self.right_rotate(ret_node))
+                if balance_factor > 1.0 && self.get_balance_factor(&n.borrow().left.clone().unwrap()) >= 0.0 {
+                    return Some(self.right_rotate(n))
                 }
 
                 // case RR: left rotate
-                if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) <= 0.0 {
-                    return Some(self.left_rotate(ret_node))
+                if balance_factor < -1.0 && self.get_balance_factor(&n.borrow().right.clone().unwrap()) <= 0.0 {
+                    return Some(self.left_rotate(n))
                 }
 
                 // case LR: left rotate + right rotate
-                if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) < 0.0 {
+                if balance_factor > 1.0 && self.get_balance_factor(&n.borrow().left.clone().unwrap()) < 0.0 {
                     // ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
                     // return Some(self.right_rotate(ret_node))
 
-                    let left = ret_node.borrow().left.clone().take().unwrap();
-                    ret_node.borrow_mut().left = Some(self.left_rotate(left));
-                    return Some(self.right_rotate(ret_node))
+                    let left = n.borrow().left.clone().take().unwrap();
+                    n.borrow_mut().left = Some(self.left_rotate(left));
+                    return Some(self.right_rotate(n))
                 }
 
                 // case RL: right rotate + left rotate
-                if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) > 0.0 {
+                if balance_factor < -1.0 && self.get_balance_factor(&n.borrow().right.clone().unwrap()) > 0.0 {
                     // ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
                     // return Some(self.left_rotate(ret_node))
 
-                    let right = ret_node.borrow().right.clone().take().unwrap();
-                    ret_node.borrow_mut().right = Some(self.right_rotate(right));
-                    return Some(self.left_rotate(ret_node))
+                    let right = n.borrow().right.clone().take().unwrap();
+                    n.borrow_mut().right = Some(self.right_rotate(right));
+                    return Some(self.left_rotate(n))
                 }
-                Some(ret_node)
+                Some(n)
             }
         }
     }
@@ -395,14 +432,30 @@ fn main() {
     // avl_tree.insert(1);
     //
     // case LR: left rotate + right rotate
-    // avl_tree.insert(3); //thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:170:22
+    // avl_tree.insert(3);
     // avl_tree.insert(1);
     // avl_tree.insert(2);
     //
     // case RL: right rotate + left rotate
-    avl_tree.insert(1);// thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:176:22
-    avl_tree.insert(3);
+    // avl_tree.insert(1);
+    // avl_tree.insert(3);
+    // avl_tree.insert(2);
+    //
+    // avl_tree.delete(1); // 树里剩2和3，叶子节点数应为3，得到2错误，高度3正确
+    // avl_tree.delete(2); // 树里只剩3了，叶子数2，高度2正确
+    // avl_tree.delete(3); //正确
+
+    avl_tree.insert(1);
     avl_tree.insert(2);
+    avl_tree.insert(3);
+    avl_tree.insert(4);
+    avl_tree.insert(5);
+
+    avl_tree.delete(1);//正确
+    avl_tree.delete(2); //正确
+    avl_tree.delete(3); //树里剩4和5，叶子节点数应为3，得到2错误，高度3正确
+    avl_tree.delete(4);//正确
+    avl_tree.delete(5); // 0 0 true 正确
 
     avl_tree.in_order_traversal();
     println!("Count leaves: {:?}", avl_tree.count_leaves());
@@ -410,5 +463,7 @@ fn main() {
     println!("Is empty: {:?}", avl_tree.is_tree_empty());
 }
 
-// The functions that can be tested are insert() case LL, case RR, case LR, case RL,
-// in_order_traversal(),count_leaves(), height() and .is_tree_empty().
+// The functions that can be tested are insert() case LL, case RR, case LR, case RL, delete()
+// in_order_traversal(), height() and .is_tree_empty().
+// When there are only two nodes in the tree, the number of leaf nodes should be 3 and count_leaves() returns 2.
+// In other cases count_leaves() is correct.
