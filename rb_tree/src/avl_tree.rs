@@ -148,9 +148,9 @@ impl AVLTree {
 
         // update balance factor
         let mut balance_factor = self.get_balance_factor(&ret_node);
-        if balance_factor.abs() > 1.0 {
-            println!("unbalanced: {}", balance_factor);
-        }
+        // if balance_factor.abs() > 1.0 {
+        //     println!("unbalanced: {}", balance_factor);
+        // }
 
         //println!("insert node: {}", ret_node.borrow().value.clone());
 
@@ -323,11 +323,11 @@ impl AVLTree {
     //        T1   T2
     fn right_rotate(&self, y: AVLTreeNode) -> AVLTreeNode {
         let mut x = y.borrow().left.clone().unwrap();
-        let mut T3 = x.borrow().right.clone().unwrap();
+        let mut T3 = x.borrow().right.clone().take();
 
         // right rotate
         x.borrow_mut().right = Some(y.clone());
-        y.borrow_mut().left = Some(T3); // 借用了发生移动的y
+        y.borrow_mut().left = T3; // 借用了发生移动的y
 
         // update height of x and y
         y.borrow_mut().height = self.get_left_height(&y)
@@ -347,11 +347,13 @@ impl AVLTree {
     //                      T3   T4
     fn left_rotate(&self, y: AVLTreeNode) -> AVLTreeNode {
         let mut x = y.borrow().right.clone().unwrap();
-        let mut T2 = x.borrow().left.clone().unwrap();
+        // let mut T2 = x.borrow().left.clone().unwrap(); // 在这里会Panic，因为在21345情况下，4的左子树T2是none，这就和类型不对应了
+        let mut T2 = x.borrow().left.clone().take(); // 这样T2是option类型就可以处理none的情况
 
         // left rotate
         x.borrow_mut().left = Some(y.clone());
-        y.borrow_mut().right = Some(T2); // 借用了发生移动的y
+        //y.borrow_mut().right = Some(T2); // 借用了发生移动的y
+        y.borrow_mut().right = T2;
 
         // update height of x and y
         y.borrow_mut().height = self.get_left_height(&y)
@@ -361,18 +363,44 @@ impl AVLTree {
 
         return x
     }
+
+    // fn count_leaves(&self) -> u32 {}
+
+    // fn height(&self) -> u32 {}
+
+    // fn in_order_traversal(&self) {}
+
+    // fn is_tree_empty(&self) -> bool {}
+
 }
 
 fn main() {
     let mut avl_tree = AVLTree::new();
-    avl_tree.insert(2);
+
+    // // case LL: right rotate
+    // avl_tree.insert(1);
+    // avl_tree.insert(2);
+    // avl_tree.insert(3);
+    //
+    // // case RR: left rotate
+    // avl_tree.insert(3);
+    // avl_tree.insert(2);
+    // avl_tree.insert(1);
+    //
+    // case LR: left rotate + right rotate
+    avl_tree.insert(3); //thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:170:22
     avl_tree.insert(1);
-    avl_tree.insert(3);
-    // avl_tree.insert(4);
-    // avl_tree.insert(5);
+    avl_tree.insert(2);
+    //
+    // // case RL: right rotate + left rotate
+    // avl_tree.insert(1);// thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:176:22
+    // avl_tree.insert(3);
+    // avl_tree.insert(2);
 
     avl_tree.in_order_traversal();
     println!("Count leaves: {:?}", avl_tree.count_leaves());
     println!("Height: {:?}", avl_tree.height());
     println!("Is empty: {:?}", avl_tree.is_tree_empty());
 }
+// The functions that can be tested are insert() case LL and case RR,
+// in_order_traversal(),count_leaves(), height() and .is_tree_empty().
