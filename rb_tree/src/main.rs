@@ -68,19 +68,19 @@ impl RBTree {
 
     // fn is_tree_empty(&self) -> bool {}
 
-    fn preorder_traverse(&self, node: RBTreeNode, container: &mut Vec<String>) {
+    fn debug_preorder_traverse(&self, node: RBTreeNode, container: &mut Vec<String>) {
         container.push(node.borrow().value.to_string() + node.borrow().color.to_string());
         let left = node.borrow().left.clone();
         if left.is_some() {
-            self.preorder_traverse(left.unwrap(), container);
+            self.debug_preorder_traverse(left.unwrap(), container);
         }
         let right = node.borrow().right.clone();
         if right.is_some() {
-            self.preorder_traverse(right.unwrap(), container);
+            self.debug_preorder_traverse(right.unwrap(), container);
         }
     }
 
-    fn preorder_traverse_reconstruct(&self, node: RBTreeNode) {
+    fn debug_preorder_traverse_reconstruct(&self, node: RBTreeNode) {
         let temp = match node.borrow().parent.clone() {
             Some(p) => p.borrow().value,
             None => 0,
@@ -89,11 +89,11 @@ impl RBTree {
         node.borrow_mut().parent = None;
         let left = node.borrow().left.clone();
         if left.is_some() {
-            self.preorder_traverse_reconstruct(left.unwrap());
+            self.debug_preorder_traverse_reconstruct(left.unwrap());
         }
         let right = node.borrow().right.clone();
         if right.is_some() {
-            self.preorder_traverse_reconstruct(right.unwrap());
+            self.debug_preorder_traverse_reconstruct(right.unwrap());
         }
     }
 
@@ -933,8 +933,8 @@ mod test {
         // }
         let mut tree_container = vec![];
         let mut left_rotate_container = vec![];
-        tree.preorder_traverse(tree.root.clone().unwrap(), &mut tree_container);
-        after_left_rot.preorder_traverse(after_left_rot.root.clone().unwrap(), &mut left_rotate_container);
+        tree.debug_preorder_traverse(tree.root.clone().unwrap(), &mut tree_container);
+        after_left_rot.debug_preorder_traverse(after_left_rot.root.clone().unwrap(), &mut left_rotate_container);
         println!("check tree {:#?} {:#?}", tree_container, left_rotate_container);
         assert!(is_equal(tree.root, after_left_rot.root))
     }
@@ -949,13 +949,13 @@ mod test {
         });
         let root = tree.root.clone().unwrap();
         let mut container = vec![];
-        tree.preorder_traverse(root.clone(), &mut container);
+        tree.debug_preorder_traverse(root.clone(), &mut container);
         let result = isValidRedBlackTree(tree.root);
         assert_eq!(result, true);
         assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
 
         // let mut container = vec![];
-        // RedBlackTreeNode::preorder_traverse(root.clone(), &mut container);
+        // RedBlackTreeNode::debug_preorder_traverse(root.clone(), &mut container);
         // assert_eq!(container, vec![0, -16, 16, 8, 22, 20, 24]);
 
         // let mut container = vec![];
@@ -1003,7 +1003,7 @@ mod test {
          let root = tree.root.clone().unwrap();
          tree.delete(16);
          let mut container = vec![];
-         tree.preorder_traverse(root.clone(), &mut container);
+         tree.debug_preorder_traverse(root.clone(), &mut container);
          let result = isValidRedBlackTree(tree.root);
          assert_eq!(result, true);
          
@@ -1061,12 +1061,12 @@ fn main() {
     // rb_tree.delete(8);
     // rb_tree.delete(17);
     let temp = rb_tree.clone();
-    temp.preorder_traverse_reconstruct(rb_tree.root.clone().unwrap());
+    temp.debug_preorder_traverse_reconstruct(rb_tree.root.clone().unwrap());
     println!("{:#?}", temp);
     let container: &mut Vec<String> = &mut vec![];
     rb_tree
         .clone()
-        .preorder_traverse(rb_tree.root.clone().unwrap(), container);
+        .debug_preorder_traverse(rb_tree.root.clone().unwrap(), container);
     println!("preorder: {:?}", container);
     let container: &mut Vec<String> = &mut vec![];
     rb_tree
