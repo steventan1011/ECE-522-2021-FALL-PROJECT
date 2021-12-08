@@ -167,13 +167,21 @@ impl AVLTree {
 
         // case LR: left rotate + right rotate
         if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) < 0.0 {
-            ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
+            // ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
+            // return Some(self.right_rotate(ret_node))
+
+            let left = ret_node.borrow().left.clone().take().unwrap();
+            ret_node.borrow_mut().left = Some(self.left_rotate(left));
             return Some(self.right_rotate(ret_node))
         }
 
         // case RL: right rotate + left rotate
         if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) > 0.0 {
-            ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
+            // ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
+            // return Some(self.left_rotate(ret_node))
+
+            let right = ret_node.borrow().right.clone().take().unwrap();
+            ret_node.borrow_mut().right = Some(self.right_rotate(right));
             return Some(self.left_rotate(ret_node))
         }
         Some(ret_node)
@@ -256,13 +264,21 @@ impl AVLTree {
 
                 // case LR: left rotate + right rotate
                 if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) < 0.0 {
-                    ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
+                    // ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
+                    // return Some(self.right_rotate(ret_node))
+
+                    let left = ret_node.borrow().left.clone().take().unwrap();
+                    ret_node.borrow_mut().left = Some(self.left_rotate(left));
                     return Some(self.right_rotate(ret_node))
                 }
 
                 // case RL: right rotate + left rotate
                 if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) > 0.0 {
-                    ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
+                    // ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
+                    // return Some(self.left_rotate(ret_node))
+
+                    let right = ret_node.borrow().right.clone().take().unwrap();
+                    ret_node.borrow_mut().right = Some(self.right_rotate(right));
                     return Some(self.left_rotate(ret_node))
                 }
                 Some(ret_node)
@@ -363,15 +379,6 @@ impl AVLTree {
 
         return x
     }
-
-    // fn count_leaves(&self) -> u32 {}
-
-    // fn height(&self) -> u32 {}
-
-    // fn in_order_traversal(&self) {}
-
-    // fn is_tree_empty(&self) -> bool {}
-
 }
 
 fn main() {
@@ -388,19 +395,20 @@ fn main() {
     // avl_tree.insert(1);
     //
     // case LR: left rotate + right rotate
-    avl_tree.insert(3); //thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:170:22
-    avl_tree.insert(1);
-    avl_tree.insert(2);
-    //
-    // // case RL: right rotate + left rotate
-    // avl_tree.insert(1);// thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:176:22
-    // avl_tree.insert(3);
+    // avl_tree.insert(3); //thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:170:22
+    // avl_tree.insert(1);
     // avl_tree.insert(2);
+    //
+    // case RL: right rotate + left rotate
+    avl_tree.insert(1);// thread 'main' panicked at 'already borrowed: BorrowMutError', src/main.rs:176:22
+    avl_tree.insert(3);
+    avl_tree.insert(2);
 
     avl_tree.in_order_traversal();
     println!("Count leaves: {:?}", avl_tree.count_leaves());
     println!("Height: {:?}", avl_tree.height());
     println!("Is empty: {:?}", avl_tree.is_tree_empty());
 }
-// The functions that can be tested are insert() case LL and case RR,
+
+// The functions that can be tested are insert() case LL, case RR, case LR, case RL,
 // in_order_traversal(),count_leaves(), height() and .is_tree_empty().
