@@ -8,21 +8,21 @@ pub trait CommonTreeTrait<T: Ord + Copy + fmt::Debug, TreeNode: CommonTreeNodeTr
     fn get_root(&self) -> Option<Rc<RefCell<TreeNode>>>;
 
     fn count_leaves(&self) -> u32 {
-        match self.get_root().clone() {
+        match self.get_root() {
             None => 0,
             Some(node) => node.borrow().count_leaves(),
         }
     }
 
     fn height(&self) -> u32 {
-        match self.get_root().clone() {
+        match self.get_root() {
             None => 0,
             Some(node) => node.borrow().get_height(),
         }
     }
 
     fn in_order_traversal(&self) {
-        match self.get_root().clone() {
+        match self.get_root() {
             None => println!("There is no node in the tree!"),
             Some(node) => {
                 node.borrow().in_order_traversal();
@@ -32,7 +32,7 @@ pub trait CommonTreeTrait<T: Ord + Copy + fmt::Debug, TreeNode: CommonTreeNodeTr
     }
 
     fn pre_order_traversal(&self) {
-        match self.get_root().clone() {
+        match self.get_root() {
             None => println!("There is no node in the tree!"),
             Some(node) => {
                 node.borrow().pre_order_traversal();
@@ -42,7 +42,7 @@ pub trait CommonTreeTrait<T: Ord + Copy + fmt::Debug, TreeNode: CommonTreeNodeTr
     }
 
     fn contains(&self, value: T) -> bool {
-        match self.get_root().clone() {
+        match self.get_root() {
             None => false,
             Some(node) => node.borrow().contains(value),
         }
@@ -86,12 +86,12 @@ pub trait CommonTreeNodeTrait<T: Ord + Copy + fmt::Debug> {
     }
 
     fn in_order_traversal(&self) {
-        let left = self.get_left().clone();
+        let left = self.get_left();
         if left.is_some() {
             left.unwrap().borrow().in_order_traversal();
         }
         print!("{:?} ", self.get_value());
-        let right = self.get_right().clone();
+        let right = self.get_right();
         if right.is_some() {
             right.unwrap().borrow().in_order_traversal();
         }
@@ -99,11 +99,11 @@ pub trait CommonTreeNodeTrait<T: Ord + Copy + fmt::Debug> {
 
     fn pre_order_traversal(&self) {
         print!("{:?} ", self.get_value());
-        let left = self.get_left().clone();
+        let left = self.get_left();
         if left.is_some() {
             left.unwrap().borrow().in_order_traversal();
         }
-        let right = self.get_right().clone();
+        let right = self.get_right();
         if right.is_some() {
             right.unwrap().borrow().in_order_traversal();
         }
