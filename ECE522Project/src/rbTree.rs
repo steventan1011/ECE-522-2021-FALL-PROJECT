@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::cmp::max;
+use std::fmt;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -15,21 +16,21 @@ enum NodeDirection {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RBTree {
-    root: OptionRBTreeNode,
+pub struct RBTree<T: Ord + Copy + fmt::Debug> {
+    root: OptionRBTreeNode<T>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct TreeNode<T> {
+pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
     color: NodeColor,
     value: T,
-    parent: OptionRBTreeNode,
-    left: OptionRBTreeNode,
-    right: OptionRBTreeNode,
+    parent: OptionRBTreeNode<T>,
+    left: OptionRBTreeNode<T>,
+    right: OptionRBTreeNode<T>,
 }
 
-type RBTreeNode = Rc<RefCell<TreeNode<u32>>>;
-type OptionRBTreeNode = Option<RBTreeNode>;
+type RBTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
+type OptionRBTreeNode<T> = Option<RBTreeNode<T>>;
 
 impl NodeColor {
     fn to_string(&self) -> &str {
@@ -42,12 +43,12 @@ impl NodeColor {
 }
 
 // RBTree
-impl RBTree {
+impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
     pub fn new() -> Self {
         RBTree { root: None }
     }
 
-    pub fn insert(&mut self, insert_value: u32) {
+    pub fn insert(&mut self, insert_value: T) {
         let root = self.root.clone();
         match root {
             None => {
@@ -59,7 +60,7 @@ impl RBTree {
         }
     }
 
-    pub fn delete(&mut self, delete_value: u32) {
+    pub fn delete(&mut self, delete_value: T) {
         let root = self.root.clone();
         match root {
             None => (),
@@ -86,7 +87,7 @@ impl RBTree {
         }
     }
 
-    pub fn preorder_traverse(&self, node: RBTreeNode, container: &mut Vec<u32>) {
+    pub fn preorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
         container.push(node.borrow().value);
         let left = node.borrow().left.clone();
         if left.is_some() {
@@ -98,7 +99,7 @@ impl RBTree {
         }
     }
 
-    pub fn preorder_traverse_print(&self) {
+    pub fn preorder_traversal(&self) {
         print!("Preorder traversal: ");
         match self.root.clone() {
             None => print!("the tree does not have node"),
@@ -123,8 +124,8 @@ impl RBTree {
     }
 
     // 下面这三个之后会不要，用上面的in_order_traversal
-    pub fn debug_preorder_traverse(&self, node: RBTreeNode, container: &mut Vec<String>) {
-        container.push(node.borrow().value.to_string() + node.borrow().color.to_string());
+    pub fn debug_preorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
+        container.push(node.borrow().value);
         let left = node.borrow().left.clone();
         if left.is_some() {
             self.debug_preorder_traverse(left.unwrap(), container);
@@ -135,42 +136,42 @@ impl RBTree {
         }
     }
 
-    pub fn debug_preorder_traverse_reconstruct(&self, node: RBTreeNode) {
-        let temp = match node.borrow().parent.clone() {
-            Some(p) => p.borrow().value,
-            None => 0,
-        };
-        node.borrow_mut().parent = None;
-        let left = node.borrow().left.clone();
-        if left.is_some() {
-            self.debug_preorder_traverse_reconstruct(left.unwrap());
-        }
-        let right = node.borrow().right.clone();
-        if right.is_some() {
-            self.debug_preorder_traverse_reconstruct(right.unwrap());
-        }
-    }
+    // pub fn debug_preorder_traverse_reconstruct(&self, node: RBTreeNode<T>) {
+    //     let temp = match node.borrow().parent.clone() {
+    //         Some(p) => p.borrow().value,
+    //         None => None,
+    //     };
+    //     node.borrow_mut().parent = None;
+    //     let left = node.borrow().left.clone();
+    //     if left.is_some() {
+    //         self.debug_preorder_traverse_reconstruct(left.unwrap());
+    //     }
+    //     let right = node.borrow().right.clone();
+    //     if right.is_some() {
+    //         self.debug_preorder_traverse_reconstruct(right.unwrap());
+    //     }
+    // }
 
-    pub fn inorder_traverse(&self, node: RBTreeNode, container: &mut Vec<String>) {
+    pub fn inorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
         let left = node.borrow().left.clone();
         if left.is_some() {
             self.inorder_traverse(left.unwrap(), container);
         }
-        container.push(node.borrow().value.to_string() + node.borrow().color.to_string());
+        container.push(node.borrow().value);
         let right = node.borrow().right.clone();
         if right.is_some() {
             self.inorder_traverse(right.unwrap(), container);
         }
     }
 
-    pub fn is_valid_red_black_tree(root: OptionRBTreeNode) -> bool {
+    pub fn is_valid_red_black_tree(root: OptionRBTreeNode<T>) -> bool {
         let result = TreeNode::calculate_black_height(root);
         match result {
             Some(_) => true,
             None => false,
         }
     }
-    pub fn is_equal(left: OptionRBTreeNode, right: OptionRBTreeNode) -> bool {
+    pub fn is_equal(left: OptionRBTreeNode<T>, right: OptionRBTreeNode<T>) -> bool {
         match (left, right) {
             (None, None) => true,
             (Some(_), None) | (None, Some(_)) => false,
@@ -193,8 +194,8 @@ impl RBTree {
 }
 
 // TreeNode
-impl TreeNode<u32> {
-    fn new(value: u32) -> Self {
+impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
+    fn new(value: T) -> Self {
         TreeNode {
             color: NodeColor::Red,
             value: value,
@@ -204,7 +205,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn new_with_parent(value: u32, parent: OptionRBTreeNode) -> Self {
+    fn new_with_parent(value: T, parent: OptionRBTreeNode<T>) -> Self {
         TreeNode {
             color: NodeColor::Red,
             value: value,
@@ -214,7 +215,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn new_black_with_parent(value: u32, parent: OptionRBTreeNode) -> Self {
+    fn new_black_with_parent(value: T, parent: OptionRBTreeNode<T>) -> Self {
         TreeNode {
             color: NodeColor::Black,
             value: value,
@@ -224,7 +225,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn node_insert(node: RBTreeNode, insert_value: u32) -> OptionRBTreeNode {
+    fn node_insert(node: RBTreeNode<T>, insert_value: T) -> OptionRBTreeNode<T> {
         if node.borrow().value == insert_value {
             return Some(node);
         } else if node.borrow().value > insert_value {
@@ -261,25 +262,25 @@ impl TreeNode<u32> {
         return Self::get_root(node);
     }
 
-    fn insert_maintain_rb(node: RBTreeNode) {
+    fn insert_maintain_rb(node: RBTreeNode<T>) {
         let parent = node.borrow().parent.clone();
 
         match parent {
             None => {
                 // insert case 3: node is root, no parent
-                println!("insert case 3: node is root, no parent");
+                // println!("insert case 3: node is root, no parent");
                 Self::set_black(node);
             }
             // Check parent color
             Some(parent) => {
-                println!(
-                    "=====start at insert_maintain_rb {:#?} {:#?}",
-                    node.borrow().value,
-                    parent.clone().borrow().value
-                );
+                // println!(
+                //     "=====start at insert_maintain_rb {:#?} {:#?}",
+                //     node.borrow().value,
+                //     parent.clone().borrow().value
+                // );
                 if parent.borrow().color == NodeColor::Black {
                     // insert case 1: parent is black, do not need maintain
-                    println!("insert case 1: parent is black, do not need maintain");
+                    // println!("insert case 1: parent is black, do not need maintain");
                     ();
                 }
                 // parent is red, need maintain
@@ -288,16 +289,16 @@ impl TreeNode<u32> {
                     match grand_parent {
                         None => {
                             // insert case 4: grandparent is None, then parent goes to black
-                            println!("insert case 4");
+                            // println!("insert case 4");
                             Self::set_black(parent);
                         }
                         Some(grand_parent) => {
-                            println!(
-                                "===== case 2 or 5 or 6 else parent at insert_maintain_rb {:#?} {:#?} {:#?}",
-                                node.borrow().value,
-                                parent.clone().borrow().value,
-                                grand_parent.clone().borrow().value
-                            );
+                            // println!(
+                            //     "===== case 2 or 5 or 6 else parent at insert_maintain_rb {:#?} {:#?} {:#?}",
+                            //     node.borrow().value,
+                            //     parent.clone().borrow().value,
+                            //     grand_parent.clone().borrow().value
+                            // );
                             // let grand_parent_borrowed = grand_parent.borrow();
                             if grand_parent.borrow().color == NodeColor::Red {
                                 panic!("Red violation!");
@@ -307,7 +308,7 @@ impl TreeNode<u32> {
                                 match uncle {
                                     None => {
                                         // insert case 6.1: left left && uncle is None
-                                        println!("insert case 6.1: left left && uncle is None");
+                                        // println!("insert case 6.1: left left && uncle is None");
                                         Self::right_rotate(grand_parent.clone());
                                         let parent = node.borrow().parent.clone().unwrap();
                                         Self::set_black(parent.clone());
@@ -315,22 +316,22 @@ impl TreeNode<u32> {
                                         Self::set_red(right.clone());
                                     }
                                     Some(uncle) => {
-                                        println!(
-                                            "===== uncle 161 at insert_maintain_rb {:#?}",
-                                            uncle.clone().borrow().value,
-                                        );
+                                        // println!(
+                                        //     "===== uncle 161 at insert_maintain_rb {:#?}",
+                                        //     uncle.clone().borrow().value,
+                                        // );
                                         if uncle.borrow().color == NodeColor::Red {
                                             // insert case 2: uncle is red
-                                            println!("insert case 2: uncle is red");
+                                            // println!("insert case 2: uncle is red");
                                             Self::set_black(parent.clone());
                                             Self::set_black(uncle.clone());
                                             Self::set_red(grand_parent.clone());
                                             Self::insert_maintain_rb(grand_parent.clone());
                                         } else {
                                             // insert case 6.1: left left && uncle is black
-                                            println!(
-                                                "insert case 6.1: left left && uncle is black"
-                                            );
+                                            // println!(
+                                            //     "insert case 6.1: left left && uncle is black"
+                                            // );
                                             Self::right_rotate(grand_parent.clone());
                                             let parent = node.borrow().parent.clone().unwrap();
                                             Self::set_black(parent.clone());
@@ -342,16 +343,16 @@ impl TreeNode<u32> {
                             } else if Self::is_right(parent.clone()) && Self::is_right(node.clone())
                             {
                                 let uncle = grand_parent.borrow().left.clone();
-                                println!(
-                                    "===== else self.is_right(parent.clone()) && self.is_right(node.clone() {:#?} {:#?} {:#?}",
-                                    node.borrow().value,
-                                    parent.clone().borrow().value,
-                                    grand_parent.clone().borrow().value
-                                );
+                                // println!(
+                                //     "===== else self.is_right(parent.clone()) && self.is_right(node.clone() {:#?} {:#?} {:#?}",
+                                //     node.borrow().value,
+                                //     parent.clone().borrow().value,
+                                //     grand_parent.clone().borrow().value
+                                // );
                                 match uncle {
                                     None => {
                                         // insert case 6.2: right right && uncle is None
-                                        println!("insert case 6.2: right right && uncle is None");
+                                        // println!("insert case 6.2: right right && uncle is None");
                                         Self::left_rotate(grand_parent.clone());
                                         let parent = node.borrow().parent.clone().unwrap();
                                         Self::set_black(parent.clone());
@@ -359,22 +360,22 @@ impl TreeNode<u32> {
                                         Self::set_red(left.clone());
                                     }
                                     Some(uncle) => {
-                                        println!(
-                                            "===== uncle 197 at insert_maintain_rb {:#?}",
-                                            uncle.clone().borrow().value,
-                                        );
+                                        // println!(
+                                        //     "===== uncle 197 at insert_maintain_rb {:#?}",
+                                        //     uncle.clone().borrow().value,
+                                        // );
                                         if uncle.borrow().color == NodeColor::Red {
                                             // insert case 2: uncle is red
-                                            println!("insert case 2: uncle is red");
+                                            // println!("insert case 2: uncle is red");
                                             Self::set_black(parent.clone());
                                             Self::set_black(uncle.clone());
                                             Self::set_red(grand_parent.clone());
                                             Self::insert_maintain_rb(grand_parent.clone());
                                         } else {
                                             // insert case 6.2: right right && uncle is black
-                                            println!(
-                                                "insert case 6.2: right right && uncle is black"
-                                            );
+                                            // println!(
+                                            //     "insert case 6.2: right right && uncle is black"
+                                            // );
                                             Self::left_rotate(grand_parent.clone());
                                             let parent = node.borrow().parent.clone().unwrap();
                                             Self::set_black(parent.clone());
@@ -389,22 +390,22 @@ impl TreeNode<u32> {
                                 match uncle {
                                     None => {
                                         // insert case 5.1: left right  && uncle is None
-                                        println!("case 5.1: left right  && uncle is None");
-                                        println!(
-                                            "===== case 5.1: {:#?} {:#?} {:#?}",
-                                            node.borrow().value,
-                                            parent.clone().borrow().value,
-                                            grand_parent.clone().borrow().value
-                                        );
+                                        // println!("case 5.1: left right  && uncle is None");
+                                        // println!(
+                                        //     "===== case 5.1: {:#?} {:#?} {:#?}",
+                                        //     node.borrow().value,
+                                        //     parent.clone().borrow().value,
+                                        //     grand_parent.clone().borrow().value
+                                        // );
                                         Self::left_rotate(parent.clone());
                                         let left_child = node.borrow().left.clone().unwrap();
                                         Self::insert_maintain_rb(left_child.clone());
                                     }
                                     Some(uncle) => {
-                                        println!(
-                                            "===== uncle 237 at insert_maintain_rb {:#?}",
-                                            uncle.clone().borrow().value,
-                                        );
+                                        // println!(
+                                        //     "===== uncle 237 at insert_maintain_rb {:#?}",
+                                        //     uncle.clone().borrow().value,
+                                        // );
                                         if uncle.borrow().color == NodeColor::Red {
                                             // insert case 2: uncle is red
                                             println!("insert case 2: uncle is red");
@@ -414,9 +415,9 @@ impl TreeNode<u32> {
                                             Self::insert_maintain_rb(grand_parent.clone());
                                         } else {
                                             // insert case 5.1: left right  && uncle is black
-                                            println!(
-                                                "insert case 5.1: left right  && uncle is black"
-                                            );
+                                            // println!(
+                                            //     "insert case 5.1: left right  && uncle is black"
+                                            // );
                                             Self::left_rotate(parent.clone());
                                             let left_child = node.borrow().left.clone().unwrap();
                                             Self::insert_maintain_rb(left_child.clone());
@@ -426,37 +427,37 @@ impl TreeNode<u32> {
                             } else if Self::is_right(parent.clone()) && Self::is_left(node.clone())
                             {
                                 let uncle = grand_parent.borrow().left.clone();
-                                println!(
-                                    "===== else if self.is_right(parent.clone()) && self.is_left(node.clone() {:#?} {:#?} {:#?}",
-                                    node.borrow().value,
-                                    parent.clone().borrow().value,
-                                    grand_parent.borrow().value
-                                );
+                                // println!(
+                                //     "===== else if self.is_right(parent.clone()) && self.is_left(node.clone() {:#?} {:#?} {:#?}",
+                                //     node.borrow().value,
+                                //     parent.clone().borrow().value,
+                                //     grand_parent.borrow().value
+                                // );
                                 match uncle {
                                     None => {
                                         // insert case 5.2: right left && uncle is None
-                                        println!("insert case 5.2: right left && uncle is None");
+                                        // println!("insert case 5.2: right left && uncle is None");
                                         Self::right_rotate(parent.clone());
                                         let right_child = node.borrow().right.clone().unwrap();
                                         Self::insert_maintain_rb(right_child.clone());
                                     }
                                     Some(uncle) => {
-                                        println!(
-                                            "===== uncle 282 at insert_maintain_rb {:#?}",
-                                            uncle.clone().borrow().value,
-                                        );
+                                        // println!(
+                                        //     "===== uncle 282 at insert_maintain_rb {:#?}",
+                                        //     uncle.clone().borrow().value,
+                                        // );
                                         if uncle.borrow().color == NodeColor::Red {
                                             // insert case 2: uncle is red
-                                            println!("insert case 2: uncle is red");
+                                            // println!("insert case 2: uncle is red");
                                             Self::set_black(parent.clone());
                                             Self::set_black(uncle.clone());
                                             Self::set_red(grand_parent.clone());
                                             Self::insert_maintain_rb(grand_parent.clone());
                                         } else {
                                             // insert case 5.2: right left && uncle is black
-                                            println!(
-                                                "insert case 5.2: right left && uncle is black"
-                                            );
+                                            // println!(
+                                            //     "insert case 5.2: right left && uncle is black"
+                                            // );
                                             Self::right_rotate(parent.clone());
                                             let right_child = node.borrow().right.clone().unwrap();
                                             Self::insert_maintain_rb(right_child.clone());
@@ -471,7 +472,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn node_delete(node: RBTreeNode, delete_value: u32) -> OptionRBTreeNode {
+    fn node_delete(node: RBTreeNode<T>, delete_value: T) -> OptionRBTreeNode<T> {
         if node.borrow().value > delete_value {
             let left_child = node.borrow().left.clone();
             if left_child.is_some() {
@@ -608,7 +609,7 @@ impl TreeNode<u32> {
         return Self::get_root(node);
     }
 
-    fn delete_maintain_rb(node: RBTreeNode) {
+    fn delete_maintain_rb(node: RBTreeNode<T>) {
         let parent = node.borrow().parent.clone();
         match parent {
             // delete case 2: parent is None
@@ -699,15 +700,15 @@ impl TreeNode<u32> {
 
     // left and right rotate
     // node is the root of the subtree
-    fn left_rotate(node: RBTreeNode) {
+    fn left_rotate(node: RBTreeNode<T>) {
         let parent = node.borrow().parent.clone();
         let right = node.borrow().right.clone();
 
-        println!(
-            "left ro start {} {:#?}",
-            node.clone().borrow().value,
-            node.clone().borrow().color
-        );
+        // println!(
+        //     "left ro start {} {:#?}",
+        //     node.clone().borrow().value,
+        //     node.clone().borrow().color
+        // );
 
         node.borrow_mut().right = right.clone().unwrap().borrow().left.clone();
         if node.borrow().right.is_some() {
@@ -729,15 +730,15 @@ impl TreeNode<u32> {
         right.clone().unwrap().borrow_mut().parent = parent;
     }
 
-    fn right_rotate(node: RBTreeNode) {
+    fn right_rotate(node: RBTreeNode<T>) {
         let parent = node.borrow().parent.clone();
         let left = node.borrow().left.clone();
 
-        println!(
-            "right ro start {} {:#?}",
-            node.clone().borrow().value,
-            node.clone().borrow().color
-        );
+        // println!(
+        //     "right ro start {} {:#?}",
+        //     node.clone().borrow().value,
+        //     node.clone().borrow().color
+        // );
         node.borrow_mut().left = left.clone().unwrap().borrow().right.clone();
         if node.borrow().left.is_some() {
             let left = node.borrow().left.clone().unwrap();
@@ -758,7 +759,7 @@ impl TreeNode<u32> {
         left.clone().unwrap().borrow_mut().parent = parent;
     }
 
-    fn is_left(node: RBTreeNode) -> bool {
+    fn is_left(node: RBTreeNode<T>) -> bool {
         // Return true if the node is the left child of its parent.
         match node.borrow().parent.clone() {
             Some(parent) => match parent.borrow().left.clone() {
@@ -769,7 +770,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn is_right(node: RBTreeNode) -> bool {
+    fn is_right(node: RBTreeNode<T>) -> bool {
         // Return true if the node is the right child of its parent.
         match node.borrow().parent.clone() {
             Some(parent) => match parent.borrow().right.clone() {
@@ -781,17 +782,17 @@ impl TreeNode<u32> {
     }
 
     // set node color
-    fn set_red(node: RBTreeNode) -> RBTreeNode {
+    fn set_red(node: RBTreeNode<T>) -> RBTreeNode<T> {
         node.borrow_mut().color = NodeColor::Red;
         return node;
     }
 
-    fn set_black(node: RBTreeNode) -> RBTreeNode {
+    fn set_black(node: RBTreeNode<T>) -> RBTreeNode<T> {
         node.borrow_mut().color = NodeColor::Black;
         return node;
     }
 
-    fn reverse_color(node: RBTreeNode) {
+    fn reverse_color(node: RBTreeNode<T>) {
         if node.borrow().color == NodeColor::Red {
             node.borrow_mut().color = NodeColor::Black;
         } else {
@@ -800,7 +801,7 @@ impl TreeNode<u32> {
     }
 
     // find the min value in its children
-    fn get_min_value_in_children(node: RBTreeNode) -> u32 {
+    fn get_min_value_in_children(node: RBTreeNode<T>) -> T {
         match node.borrow().left.clone() {
             Some(left) => Self::get_min_value_in_children(left),
             None => node.borrow().value.clone(),
@@ -808,14 +809,14 @@ impl TreeNode<u32> {
     }
 
     // find the max value in its children
-    fn get_max_value_in_children(node: RBTreeNode) -> u32 {
+    fn get_max_value_in_children(node: RBTreeNode<T>) -> T {
         match node.borrow().right.clone() {
             Some(right) => Self::get_max_value_in_children(right),
             None => node.borrow().value.clone(),
         }
     }
 
-    fn get_root(node: RBTreeNode) -> OptionRBTreeNode {
+    fn get_root(node: RBTreeNode<T>) -> OptionRBTreeNode<T> {
         let parent = node.borrow().parent.clone();
         match parent {
             Some(p) => Self::get_root(p),
@@ -824,7 +825,7 @@ impl TreeNode<u32> {
     }
 
     // get uncle
-    fn get_uncle(node: RBTreeNode) -> OptionRBTreeNode {
+    fn get_uncle(node: RBTreeNode<T>) -> OptionRBTreeNode<T> {
         let parent = node.borrow().parent.clone();
         match parent {
             // self is root
@@ -846,7 +847,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn get_sibling(node: RBTreeNode) -> OptionRBTreeNode {
+    fn get_sibling(node: RBTreeNode<T>) -> OptionRBTreeNode<T> {
         // Get the current node's sibling, or None if it does not exist.
         match node.borrow().parent.clone() {
             None => None,
@@ -861,14 +862,14 @@ impl TreeNode<u32> {
     }
 
     // make None to be real leaves with black color
-    fn get_color(node: OptionRBTreeNode) -> NodeColor {
+    fn get_color(node: OptionRBTreeNode<T>) -> NodeColor {
         match node {
             None => NodeColor::Black,
             Some(node) => node.borrow().color.clone(),
         }
     }
 
-    fn in_order_traversal(node: RBTreeNode) {
+    fn in_order_traversal(node: RBTreeNode<T>) {
         let left = node.borrow().left.clone();
         if left.is_some() {
             Self::in_order_traversal(left.unwrap());
@@ -880,7 +881,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn preorder_traversal(node: RBTreeNode) {
+    fn preorder_traversal(node: RBTreeNode<T>) {
         print!("{:?} {:?} ", node.borrow().value, node.borrow().color);
         let left = node.borrow().left.clone();
         if left.is_some() {
@@ -892,7 +893,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn count_leaves(node: RBTreeNode) -> u32 {
+    fn count_leaves(node: RBTreeNode<T>) -> u32 {
         let left = node.borrow().left.clone();
         let right = node.borrow().right.clone();
         if left.is_none() && right.is_none() {
@@ -906,7 +907,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn get_height(node: RBTreeNode) -> u32 {
+    fn get_height(node: RBTreeNode<T>) -> u32 {
         let left = node.borrow().left.clone();
         let right = node.borrow().right.clone();
         let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
@@ -914,7 +915,7 @@ impl TreeNode<u32> {
         return max(left_height, right_height) + 1;
     }
 
-    fn calculate_black_height(node: OptionRBTreeNode) -> Option<usize> {
+    fn calculate_black_height(node: OptionRBTreeNode<T>) -> Option<usize> {
         match node {
             None => Some(1),
             Some(node) => {
@@ -1030,10 +1031,6 @@ mod test {
             after_left_rot.root.clone().unwrap(),
             &mut left_rotate_container,
         );
-        println!(
-            "check tree {:#?} {:#?}",
-            tree_container, left_rotate_container
-        );
 
         assert_eq!(tree_container, left_rotate_container);
     }
@@ -1049,7 +1046,6 @@ mod test {
         let root = tree.root.clone().unwrap();
         let mut container = vec![];
         tree.preorder_traverse(root.clone(), &mut container);
-        println!("check tree  {:#?}", container);
         assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
         
         // let mut container = vec![];

@@ -99,7 +99,7 @@ fn rbt_cli() {
                 tree.delete(val);
             },
             "print" => {print!("Your tree: ");
-                tree.preorder_traverse_print();},
+                tree.preorder_traversal();},
             "exit" => return,
             _ => println!("Command not recognized. Try 'help' for valid operations"),
         }
