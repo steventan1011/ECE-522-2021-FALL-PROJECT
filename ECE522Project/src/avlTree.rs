@@ -487,6 +487,21 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
+    /// Return the minimum value of AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree;
+    /// let mut avl_tree = AVLTree::new();
+    /// println!("{:?}", avl_tree.min()); // None
+    /// avl_tree.insert(1);
+    /// avl_tree.insert(3);
+    /// avl_tree.insert(5);
+    /// avl_tree.insert(2);
+    /// avl_tree.insert(4);
+    /// println!("{:?}", avl_tree.min()); // Some(1)
+    /// ```
     pub fn min(&self) -> Option<T> {
         match self.get_root() {
             None => None,

@@ -1,11 +1,19 @@
+//! Red-black tree
+//!
+//! You can generate a red-black tree, and insert or delete nodes.
+
 use std::cell::RefCell;
 use std::cmp::max;
 use std::fmt;
 use std::rc::Rc;
 
+/// Color representation for the [TreeNode](struct.TreeNode.html)
+/// of [RBTree](struct.RBTree.html) struct
 #[derive(Clone, Debug, PartialEq)]
 pub enum NodeColor {
+    /// Red color
     Red,
+    /// Black color, the root of [RBTree](struct.RBTree.html) will be set to Black
     Black,
 }
 
@@ -15,14 +23,18 @@ enum NodeDirection {
     Right,
 }
 
+/// Structure of RBTree
 #[derive(Clone, Debug, PartialEq)]
 pub struct RBTree<T: Ord + Copy + fmt::Debug> {
     root: OptionRBTreeNode<T>,
 }
 
+/// Node struct for [RBTree](struct.RBTree.html) struct
 #[derive(Clone, Debug, PartialEq)]
 pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
+    /// The color of the node
     color: NodeColor,
+    /// Data stored in the node
     value: T,
     parent: OptionRBTreeNode<T>,
     left: OptionRBTreeNode<T>,
@@ -32,6 +44,7 @@ pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
 type RBTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
 type OptionRBTreeNode<T> = Option<RBTreeNode<T>>;
 
+/// Implementations of NodeColor
 impl NodeColor {
     fn to_string(&self) -> &str {
         if self == &NodeColor::Red {
@@ -42,12 +55,30 @@ impl NodeColor {
     }
 }
 
-// RBTree
+/// Implementations of RBTree
 impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
+
+    /// Create a new red-black Tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// ```
     pub fn new() -> Self {
         RBTree { root: None }
     }
 
+    /// Insert a new value to the red-black Tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// tree.insert(1);
+    /// ```
     pub fn insert(&mut self, insert_value: T) {
         let root = self.root.clone();
         match root {
@@ -60,6 +91,15 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         }
     }
 
+    /// Delete a value from the red-black Tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// tree.delete(1);
+    /// ```
     pub fn delete(&mut self, delete_value: T) {
         let root = self.root.clone();
         match root {
@@ -71,6 +111,23 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         }
     }
 
+    /// Counts leaves(None nodes) of the red-black Tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// tree.insert(1);
+    /// println!("{}", tree.count_leaves());  // 2
+    /// tree.insert(2);
+    /// println!("{}", tree.count_leaves());  // 3
+    /// tree.insert(3);
+    /// println!("{}", tree.count_leaves());  // 4
+    ///
+    /// let mut leaf_number = tree.count_leaves();
+    /// assert_eq!(4, leaf_number);
+    /// ```
     // count the leaves (None nodes)
     pub fn count_leaves(&self) -> u32 {
         match self.root.clone() {
@@ -79,6 +136,19 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         }
     }
 
+    /// Gets height of the red-black Tree (from root to leaves)
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// assert_eq!(0, tree.height());
+    /// tree.insert(1);
+    /// assert_eq!(2, tree.height());
+    ///tree.insert(2);
+    /// assert_eq!(3, tree.height());
+    /// ```
     // from root to leaves
     pub fn height(&self) -> u32 {
         match self.root.clone() {
@@ -87,6 +157,7 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         }
     }
 
+    // for testing
     pub fn preorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
         container.push(node.borrow().value);
         let left = node.borrow().left.clone();
@@ -99,6 +170,20 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         }
     }
 
+    /// Prints red-black tree preorder
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// tree.insert(1);
+    /// tree.insert(3);
+    /// tree.insert(5);
+    /// tree.insert(2);
+    /// tree.insert(4);
+    /// tree.preorder_traversal(); // Preorder traversal: 3 2 1 5 4
+    ///
     pub fn preorder_traversal(&self) {
         print!("Preorder traversal: ");
         match self.root.clone() {
@@ -108,7 +193,20 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         println!();
     }
 
-    // inorder traverse
+    /// Prints red-black tree preorder
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// tree.insert(1);
+    /// tree.insert(3);
+    /// tree.insert(5);
+    /// tree.insert(2);
+    /// tree.insert(4);
+    /// tree.in_order_traversal(); // Inorder traversal: 1 2 3 4 5
+    ///
     pub fn in_order_traversal(&self) {
         print!("Inorder traversal: ");
         match self.root.clone() {
@@ -118,11 +216,22 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         println!()
     }
 
-    // judge if the tree is empty
+    /// Judge if the red-black tree is empty
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::rbTree::RBTree;
+    /// let mut tree = RBTree::new();
+    /// println!("{}", tree.is_tree_empty());  // true
+    /// avl_tree.insert(1);
+    /// println!("{}", tree.is_tree_empty());  // false
+    /// ```
     pub fn is_tree_empty(&self) -> bool {
         self.root.clone().map(|_| false).unwrap_or(true)
     }
 
+    // for testing
     // 下面这三个之后会不要，用上面的in_order_traversal
     pub fn debug_preorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
         container.push(node.borrow().value);
@@ -152,6 +261,7 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
     //     }
     // }
 
+    // for testing
     pub fn inorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
         let left = node.borrow().left.clone();
         if left.is_some() {
@@ -163,6 +273,7 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
             self.inorder_traverse(right.unwrap(), container);
         }
     }
+
 
     pub fn is_valid_red_black_tree(root: OptionRBTreeNode<T>) -> bool {
         let result = TreeNode::calculate_black_height(root);
@@ -868,7 +979,8 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
             Some(node) => node.borrow().color.clone(),
         }
     }
-
+    /// print nodes inorder, which will be called by
+    /// [RBTree.in_order_traversal](struct.RBTree.html#method.in_order_traversal)
     fn in_order_traversal(node: RBTreeNode<T>) {
         let left = node.borrow().left.clone();
         if left.is_some() {
@@ -881,6 +993,8 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         }
     }
 
+    /// print nodes preorder, which will be called by
+    /// [RBTree.preorder_traversal](struct.RBTree.html#method.preorder_traversal)
     fn preorder_traversal(node: RBTreeNode<T>) {
         print!("{:?} {:?} ", node.borrow().value, node.borrow().color);
         let left = node.borrow().left.clone();
