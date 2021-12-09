@@ -3,7 +3,7 @@ use std::cmp::max;
 use std::fmt;
 use std::rc::Rc;
 
-pub use crate::avlTree;
+// pub mod commonTrait;
 pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -45,19 +45,21 @@ impl NodeColor {
     }
 }
 
-// call common trait
+// extend from common tree trait
 impl<T: Ord + Copy + fmt::Debug> CommonTreeTrait<T, TreeNode<T>> for RBTree<T> {
     fn get_root(&self) -> OptionRBTreeNode<T> {
-        return self.root;
+        return self.root.clone();
     }
 }
+
+// extend from common tree node trait
 impl<T: Ord + Copy + fmt::Debug> CommonTreeNodeTrait<T> for TreeNode<T> {
     fn get_left(&self) -> OptionRBTreeNode<T> {
-        return self.left;
+        return self.left.clone();
     }
 
     fn get_right(&self) -> OptionRBTreeNode<T> {
-        return self.right;
+        return self.right.clone();
     }
 
     fn get_value(&self) -> T {
@@ -94,52 +96,52 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
         }
     }
 
-    // count the leaves (None nodes)
-    pub fn count_leaves(&self) -> u32 {
-        match self.root.clone() {
-            None => 0,
-            Some(node) => TreeNode::count_leaves(node),
-        }
-    }
+    // // count the leaves (None nodes)
+    // pub fn count_leaves(&self) -> u32 {
+    //     match self.root.clone() {
+    //         None => 0,
+    //         Some(node) => TreeNode::count_leaves(node),
+    //     }
+    // }
 
-    // from root to leaves
-    pub fn height(&self) -> u32 {
-        match self.root.clone() {
-            None => 0,
-            Some(node) => TreeNode::get_height(node),
-        }
-    }
+    // // from root to leaves
+    // pub fn height(&self) -> u32 {
+    //     match self.root.clone() {
+    //         None => 0,
+    //         Some(node) => TreeNode::get_height(node),
+    //     }
+    // }
 
-    pub fn preorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
+    pub fn pre_order_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
         container.push(node.borrow().value);
         let left = node.borrow().left.clone();
         if left.is_some() {
-            self.preorder_traverse(left.unwrap(), container);
+            self.pre_order_traverse(left.unwrap(), container);
         }
         let right = node.borrow().right.clone();
         if right.is_some() {
-            self.preorder_traverse(right.unwrap(), container);
+            self.pre_order_traverse(right.unwrap(), container);
         }
     }
 
-    pub fn preorder_traversal(&self) {
-        print!("Preorder traversal: ");
-        match self.root.clone() {
-            None => print!("the tree does not have node"),
-            Some(root) => TreeNode::preorder_traversal(root),
-        }
-        println!();
-    }
+    // pub fn pre_order_traversal(&self) {
+    //     print!("Preorder traversal: ");
+    //     match self.root.clone() {
+    //         None => print!("the tree does not have node"),
+    //         Some(root) => TreeNode::pre_order_traversal(root),
+    //     }
+    //     println!();
+    // }
 
-    // inorder traverse
-    pub fn in_order_traversal(&self) {
-        print!("Inorder traversal: ");
-        match self.root.clone() {
-            None => print!("the tree does not have node"),
-            Some(root) => TreeNode::in_order_traversal(root),
-        }
-        println!()
-    }
+    // // inorder traverse
+    // pub fn in_order_traversal(&self) {
+    //     print!("Inorder traversal: ");
+    //     match self.root.clone() {
+    //         None => print!("the tree does not have node"),
+    //         Some(root) => TreeNode::in_order_traversal(root),
+    //     }
+    //     println!()
+    // }
 
     // judge if the tree is empty
     pub fn is_tree_empty(&self) -> bool {
@@ -842,51 +844,51 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         }
     }
 
-    fn in_order_traversal(node: RBTreeNode<T>) {
-        let left = node.borrow().left.clone();
-        if left.is_some() {
-            Self::in_order_traversal(left.unwrap());
-        }
-        print!("{:?} ", node.borrow().value);
-        let right = node.borrow().right.clone();
-        if right.is_some() {
-            Self::in_order_traversal(right.unwrap());
-        }
-    }
+    // fn in_order_traversal(node: RBTreeNode<T>) {
+    //     let left = node.borrow().left.clone();
+    //     if left.is_some() {
+    //         Self::in_order_traversal(left.unwrap());
+    //     }
+    //     print!("{:?} ", node.borrow().value);
+    //     let right = node.borrow().right.clone();
+    //     if right.is_some() {
+    //         Self::in_order_traversal(right.unwrap());
+    //     }
+    // }
 
-    fn preorder_traversal(node: RBTreeNode<T>) {
-        print!("{:?} {:?} ", node.borrow().value, node.borrow().color);
-        let left = node.borrow().left.clone();
-        if left.is_some() {
-            Self::preorder_traversal(left.unwrap());
-        }
-        let right = node.borrow().right.clone();
-        if right.is_some() {
-            Self::preorder_traversal(right.unwrap());
-        }
-    }
+    // fn pre_order_traversal(node: RBTreeNode<T>) {
+    //     print!("{:?} {:?} ", node.borrow().value, node.borrow().color);
+    //     let left = node.borrow().left.clone();
+    //     if left.is_some() {
+    //         Self::preorder_traversal(left.unwrap());
+    //     }
+    //     let right = node.borrow().right.clone();
+    //     if right.is_some() {
+    //         Self::preorder_traversal(right.unwrap());
+    //     }
+    // }
 
-    fn count_leaves(node: RBTreeNode<T>) -> u32 {
-        let left = node.borrow().left.clone();
-        let right = node.borrow().right.clone();
-        if left.is_none() && right.is_none() {
-            2
-        } else if left.is_none() && right.is_some() {
-            Self::count_leaves(right.clone().unwrap())
-        } else if left.is_some() && right.is_none() {
-            Self::count_leaves(left.clone().unwrap())
-        } else {
-            Self::count_leaves(left.clone().unwrap()) + Self::count_leaves(right.clone().unwrap())
-        }
-    }
+    // fn count_leaves(node: RBTreeNode<T>) -> u32 {
+    //     let left = node.borrow().left.clone();
+    //     let right = node.borrow().right.clone();
+    //     if left.is_none() && right.is_none() {
+    //         2
+    //     } else if left.is_none() && right.is_some() {
+    //         Self::count_leaves(right.clone().unwrap())
+    //     } else if left.is_some() && right.is_none() {
+    //         Self::count_leaves(left.clone().unwrap())
+    //     } else {
+    //         Self::count_leaves(left.clone().unwrap()) + Self::count_leaves(right.clone().unwrap())
+    //     }
+    // }
 
-    fn get_height(node: RBTreeNode<T>) -> u32 {
-        let left = node.borrow().left.clone();
-        let right = node.borrow().right.clone();
-        let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
-        let right_height = right.map(|r| Self::get_height(r.clone())).unwrap_or(1);
-        return max(left_height, right_height) + 1;
-    }
+    // fn get_height(node: RBTreeNode<T>) -> u32 {
+    //     let left = node.borrow().left.clone();
+    //     let right = node.borrow().right.clone();
+    //     let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
+    //     let right_height = right.map(|r| Self::get_height(r.clone())).unwrap_or(1);
+    //     return max(left_height, right_height) + 1;
+    // }
 
     fn calculate_black_height(node: OptionRBTreeNode<T>) -> Option<usize> {
         match node {
@@ -997,10 +999,10 @@ mod test {
         let mut left_rotate_container = vec![];
         let real_root = TreeNode::get_root(tree.root.clone().unwrap());
         match real_root {
-            Some(rr) => tree.preorder_traverse(rr.clone(), &mut tree_container),
-            None => tree.preorder_traverse(tree.root.clone().unwrap(), &mut tree_container),
+            Some(rr) => tree.pre_order_traverse(rr.clone(), &mut tree_container),
+            None => tree.pre_order_traverse(tree.root.clone().unwrap(), &mut tree_container),
         }
-        after_left_rot.preorder_traverse(
+        after_left_rot.pre_order_traverse(
             after_left_rot.root.clone().unwrap(),
             &mut left_rotate_container,
         );
@@ -1018,7 +1020,7 @@ mod test {
         });
         let root = tree.root.clone().unwrap();
         let mut container = vec![];
-        tree.preorder_traverse(root.clone(), &mut container);
+        tree.pre_order_traverse(root.clone(), &mut container);
         assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
         // let mut container = vec![];
         // RedBlackTreeNode::debug_preorder_traverse(root.clone(), &mut container);

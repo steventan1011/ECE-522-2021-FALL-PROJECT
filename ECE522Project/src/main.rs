@@ -1,9 +1,11 @@
 pub mod avlTree;
 pub mod bsTree;
+pub mod commonTrait;
 pub mod rbTree;
 
 pub use crate::avlTree::AVLTree;
-pub use crate::bsTree::BSTree;
+// pub use crate::bsTree::BSTree;
+pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
 pub use crate::rbTree::RBTree;
 
 use std::io::{stdin, stdout, Write};
@@ -105,7 +107,7 @@ fn rbt_cli() {
             }
             "print" => {
                 print!("Your tree: ");
-                tree.preorder_traversal();
+                tree.pre_order_traversal();
             }
             "exit" => return,
             _ => println!("Command not recognized. Try 'help' for valid operations"),
