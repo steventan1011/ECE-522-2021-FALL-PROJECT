@@ -70,6 +70,18 @@ impl TreeNode<u32> {
             Self::in_order_traversal(right.unwrap());
         }
     }
+
+    fn preorder_traversal(node: AVLTreeNode) {
+        print!("{:?}", node.borrow().value);
+        let left = node.borrow().left.clone();
+        if left.is_some() {
+            Self::preorder_traversal(left.unwrap());
+        }
+        let right = node.borrow().right.clone();
+        if right.is_some() {
+            Self::preorder_traversal(right.unwrap());
+        }
+    }
 }
 
 pub struct AVLTree  {
@@ -97,6 +109,27 @@ impl AVLTree {
             None => 0,
             Some(node) => TreeNode::get_height(node),
         }
+    }
+
+    pub fn preorder_traverse(&self, node: AVLTreeNode, container: &mut Vec<u32>) {
+        container.push(node.borrow().value);
+        let left = node.borrow().left.clone();
+        if left.is_some() {
+            self.preorder_traverse(left.unwrap(), container);
+        }
+        let right = node.borrow().right.clone();
+        if right.is_some() {
+            self.preorder_traverse(right.unwrap(), container);
+        }
+    }
+
+    pub fn preorder_traversal(&self) {
+        print!("Preorder traversal: ");
+        match self.root.clone() {
+            None => print!("the tree does not have node"),
+            Some(root) => TreeNode::preorder_traversal(root),
+        }
+        println!();
     }
 
     // inorder traverse
@@ -418,52 +451,85 @@ impl AVLTree {
     }
 }
 
-fn main() {
-    let mut avl_tree = AVLTree::new();
-
-    // // case LL: right rotate
-    // avl_tree.insert(1);
-    // avl_tree.insert(2);
-    // avl_tree.insert(3);
-    //
-    // // case RR: left rotate
-    // avl_tree.insert(3);
-    // avl_tree.insert(2);
-    // avl_tree.insert(1);
-    //
-    // case LR: left rotate + right rotate
-    // avl_tree.insert(3);
-    // avl_tree.insert(1);
-    // avl_tree.insert(2);
-    //
-    // case RL: right rotate + left rotate
-    // avl_tree.insert(1);
-    // avl_tree.insert(3);
-    // avl_tree.insert(2);
-    //
-    // avl_tree.delete(1); // 树里剩2和3，叶子节点数应为3，得到2错误，高度3正确
-    // avl_tree.delete(2); // 树里只剩3了，叶子数2，高度2正确
-    // avl_tree.delete(3); //正确
-
-    avl_tree.insert(1);
-    avl_tree.insert(2);
-    avl_tree.insert(3);
-    avl_tree.insert(4);
-    avl_tree.insert(5);
-
-    avl_tree.delete(1);//正确
-    avl_tree.delete(2); //正确
-    avl_tree.delete(3); //树里剩4和5，叶子节点数应为3，得到2错误，高度3正确
-    avl_tree.delete(4);//正确
-    avl_tree.delete(5); // 0 0 true 正确
-
-    avl_tree.in_order_traversal();
-    println!("Count leaves: {:?}", avl_tree.count_leaves());
-    println!("Height: {:?}", avl_tree.height());
-    println!("Is empty: {:?}", avl_tree.is_tree_empty());
-}
-
 // The functions that can be tested are insert() case LL, case RR, case LR, case RL, delete()
 // in_order_traversal(), height() and .is_tree_empty().
 // When there are only two nodes in the tree, the number of leaf nodes should be 3 and count_leaves() returns 2.
 // In other cases count_leaves() is correct.
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rand::seq::SliceRandom;
+    use rand::{rngs::StdRng, SeedableRng};
+
+    #[test]
+    fn tree_traversal() {
+        // Test the three different tree traversal functions.
+        let mut tree = AVLTree::new();
+        tree.insert(0);
+        vec![16, 16, 8, 24, 20, 22].iter().for_each(|v| {
+            tree.insert(*v);
+        });
+        let root = tree.root.clone().unwrap();
+        let mut container = vec![];
+        tree.preorder_traverse()(root.clone(), &mut container);
+        println!("check tree  {:#?}", container);
+        assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
+        
+        // let mut container = vec![];
+        // RedBlackTreeNode::debug_preorder_traverse(root.clone(), &mut container);
+        // assert_eq!(container, vec![0, -16, 16, 8, 22, 20, 24]);
+
+        // let mut container = vec![];
+        // RedBlackTreeNode::postorder_traverse(root, &mut container);
+        // assert_eq!(container, vec![-16, 8, 20, 24, 22, 16, 0]);
+    }
+
+    #[test]
+    fn test_insert() {
+        let mut rb_tree = RBTree::new();
+        rb_tree.insert(12);
+        rb_tree.insert(1);
+        rb_tree.insert(9);
+        rb_tree.insert(2);
+        rb_tree.insert(0);
+        rb_tree.insert(11);
+        rb_tree.insert(7);
+        rb_tree.insert(19);
+        rb_tree.insert(4);
+        rb_tree.insert(15);
+        rb_tree.insert(18);
+        rb_tree.insert(5);
+        rb_tree.insert(14);
+        rb_tree.insert(13);
+        rb_tree.insert(10);
+        rb_tree.insert(16);
+        rb_tree.insert(6);
+        rb_tree.insert(3);
+        rb_tree.insert(8);
+        rb_tree.insert(17);
+
+        let result = RBTree::is_valid_red_black_tree(rb_tree.root);
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_delete() {
+         // Test the three different tree traversal functions.
+         let mut tree = RBTree::new();
+         tree.insert(0);
+         vec![16, 8, 24, 20, 22].iter().for_each(|v| {
+             tree.insert(*v);
+         });
+         
+         let root = tree.root.clone().unwrap();
+         tree.delete(16);
+         let mut container = vec![];
+         tree.debug_preorder_traverse(root.clone(), &mut container);
+         let result = RBTree::is_valid_red_black_tree(tree.root);
+         assert_eq!(result, true);
+         
+        //  assert_eq!(container, vec![8, 0, 20, 24, 22]);
+ 
+    }
+}

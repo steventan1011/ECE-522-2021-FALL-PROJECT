@@ -98,7 +98,7 @@ impl RBTree {
         }
     }
 
-    pub fn preorder_traverse_print(&self) {
+    pub fn preorder_traversal(&self) {
         print!("Preorder traversal: ");
         match self.root.clone() {
             None => print!("the tree does not have node"),
