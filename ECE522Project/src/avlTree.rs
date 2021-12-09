@@ -1,3 +1,7 @@
+//! AVL tree
+//!
+//! You can generate an AVL tree, and insert or delete nodes.
+
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::cmp::{max, Ordering};
@@ -7,6 +11,7 @@ use std::fmt;
 type AVLTreeNode = Rc<RefCell<TreeNode<u32>>>;
 type OptionAVLTreeNode = Option<AVLTreeNode>;
 
+/// Node struct for AVLTree
 struct TreeNode<T:fmt::Debug> {
     pub value: T,
     left: OptionAVLTreeNode,
@@ -14,8 +19,9 @@ struct TreeNode<T:fmt::Debug> {
     height: usize,
 }
 
+/// Implementations of AVLTreeNode
 impl TreeNode<u32> {
-    // Create a new node of type OptionAVLTreeNode
+    /// Create a new node of type OptionAVLTreeNode , which will be called by AVLTree
     fn new(value: u32) -> OptionAVLTreeNode {
         Some(Rc::new(RefCell::new(Self {
             value,
@@ -72,18 +78,43 @@ impl TreeNode<u32> {
     }
 }
 
+/// Structure of AVLTree
 pub struct AVLTree  {
     root: OptionAVLTreeNode,
 }
 
+/// Implementations of AVLTree
 impl AVLTree {
+
+    /// Creates a new AVL Tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut avl_tree = AVLTree::new();
+    /// ```
     pub fn new() -> Self {
         Self {
             root: None,
         }
     }
 
-    // count the leaves (None nodes)
+    /// Counts leaves of AVL Tree (None nodes)
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// println!("{}", avl_tree.count_leaves());  // 2
+    /// avl_tree.insert(2);
+    /// println!("{}", avl_tree.count_leaves());  // 3
+    /// avl_tree.insert(3);
+    /// println!("{}", avl_tree.count_leaves());  // 4
+    ///
+    /// let mut leaf_number = avl_tree.count_leaves();
+    /// assert_eq!(4, leaf_number);
+    /// ```
     pub fn count_leaves(&self) -> u32 {
         match self.root.clone() {
             None => 0,
@@ -91,7 +122,18 @@ impl AVLTree {
         }
     }
 
-    // from root to leaves
+    /// Gets height of AVL Tree (from root to leaves)
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut avl_tree = AVLTree::new();
+    /// assert_eq!(0, avl_tree.height());
+    /// avl_tree.insert(1);
+    /// assert_eq!(2, avl_tree.height());
+    ///avl_tree.insert(2);
+    /// assert_eq!(3, avl_tree.height());
+    /// ```
     pub fn height(&self) -> u32 {
         match self.root.clone() {
             None => 0,
@@ -99,6 +141,19 @@ impl AVLTree {
         }
     }
 
+    /// Prints AVL Tree inorder
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// avl_tree.insert(3);
+    /// avl_tree.insert(5);
+    /// avl_tree.insert(2);
+    /// avl_tree.insert(4);
+    /// avl_tree.in_order_traversal(); // Inorder traversal: 1 2 3 4 5
+    ///
     // inorder traverse
     pub fn in_order_traversal(&self) {
         print!("Inorder traversal: ");
