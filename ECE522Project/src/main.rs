@@ -14,7 +14,7 @@ pub fn get_user_input() -> String {
 }
 pub fn get_val(op: &str)-> u32 {
     loop {
-        print!("{} value > ", op);
+        print!("{} value$ ", op);
         let value = get_user_input();
         let trimmed_val = value.trim();
         match trimmed_val.parse::<u32>(){
@@ -29,13 +29,12 @@ pub fn get_val(op: &str)-> u32 {
     }
 }
 
-pub fn avl_cli() {
-    println!("\n::...AVL Tree branch...::\n");
+pub fn avl_promote() {
+    println!("\n::--------------AVL Tree--------------::\n");
     let mut tree = AVLTree::new();
-    // list_of_operations();
 
     loop {
-        print!("operation > ");
+        print!("operation$ ");
         let operation = get_user_input();
 
         match operation.to_lowercase().trim() {
@@ -48,31 +47,24 @@ pub fn avl_cli() {
                 tree.delete(val);
             },
 
-            // "contain" | "search" => {
-            //     let val = get_val("search");
-            //     println!("values found? {:?}", tree.contains(val));
-            // },
-            "height" => println!("Height of tree: {:?}", tree.height()),
             "count" => println!("Number of leaves: {:?}", tree.count_leaves()),
-            // "length" => println!("Length: {:?}", tree.len()),
-            "min" => {
-                let min_val = tree.min();
-                match min_val {
-                    None => println!("It is an empty tree!"),
-                    Some(v) => println!("Minimum Value: {:?}", v),
-                }
+
+            "height" => println!("Height of tree: {:?}", tree.height()),
+
+            "inorder print" => {
+                print!("Your tree: ");
+                tree.in_order_traversal();
             },
-            // "max" => {
-            //     let max_val = tree.max();
-            //     match max_val {
-            //         None => println!("It is an empty tree!"),
-            //         Some(v) => println!("Maximum Value: {:?}", v),
-            //     }
-            // },
-            // "empty" => println!("Is the tree empty?: {:?}", tree.is_empty()),
-            "print" => {print!("Your tree: ");
-                tree.in_order_traversal();},
-            // "help" => list_of_operations(),
+
+            "empty" => println!("Is the tree empty?: {:?}", tree.is_tree_empty()),
+
+            "search" => {
+                let val = get_val("search");
+                // println!("values found? {:?}", tree.contains(val));
+            },
+
+            "print tree" => println!("Your tree: "),
+            
             "exit" => return,
             _ => println!("Command not recognized. Try 'help' for valid operations"),
         }
@@ -80,13 +72,12 @@ pub fn avl_cli() {
 }
 
 
-fn rbt_cli() {
-    println!("\n::...Red-Black Tree branch...::\n");
+fn rbt_promote() {
+    println!("\n::---------------Red-Black Tree--------------::\n");
     let mut tree = RBTree::new();
-    // list_of_operations();
 
     loop {
-        print!("operation > ");
+        print!("operation$ ");
         let operation = get_user_input();
 
         match operation.to_lowercase().trim() {
@@ -98,8 +89,23 @@ fn rbt_cli() {
                 let val = get_val("delete");
                 tree.delete(val);
             },
-            "print" => {print!("Your tree: ");
-                tree.preorder_traversal();},
+            "count" => println!("Number of leaves: {:?}", tree.count_leaves()),
+
+            "height" => println!("Height of tree: {:?}", tree.height()),
+
+            "inorder print" => {
+                print!("Your tree: ");
+                tree.in_order_traversal();
+            },
+
+            "empty" => println!("Is the tree empty?: {:?}", tree.is_tree_empty()),
+
+            "search" => {
+                let val = get_val("search");
+                // println!("values found? {:?}", tree.contains(val));
+            },
+
+            "print tree" => println!("Your tree: "),
             "exit" => return,
             _ => println!("Command not recognized. Try 'help' for valid operations"),
         }
@@ -107,18 +113,18 @@ fn rbt_cli() {
 }
 
 fn main() {
-    println!("Hello, world!");
-    println!("you can select a tree to start or print 'exit' to leave");
-    println!("Select a tree!\n-AVL \n-RBT or type 'help' to learn about the commands");
-    print!("input > ");
+    println!("Hello!");
+    println!("you can select a tree to start or type in 'exit' to leave");
+    println!("Select a tree!\n-AVLTree \n-RBTree or type 'help' to learn about the commands");
+    print!("input$ ");
     let selected_tree = get_user_input();
 
     match selected_tree.to_lowercase().trim() {
-        "avl" => {
-            avl_cli();
+        "avltree" => {
+            avl_promote();
         },
-        "rbt" => {
-            rbt_cli();
+        "rbtree" => {
+            rbt_promote();
         },
         _ => {
             eprint!("Command not recognized. \n");
