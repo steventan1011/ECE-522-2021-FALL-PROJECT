@@ -485,7 +485,7 @@ mod test {
         tree.preorder_traverse(root.clone(), &mut pre_container);
         tree.in_order_traverse(root.clone(), &mut in_container);
         let is_balanced = tree.is_balanced(tree.root.clone());
-        println!("check {:#?}", in_container);
+        // println!("check {:#?}", in_container);
         assert_eq!(pre_container, vec![20, 8, 0, 16, 24, 22]);
         assert_eq!(in_container, vec![0, 8, 16, 20, 22, 24]);
         assert_eq!(is_balanced, true);
