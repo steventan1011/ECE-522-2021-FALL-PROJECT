@@ -1,5 +1,4 @@
-use ECE522Project::avlTree::AVLTree;
-use ECE522Project::rbTree::RBTree;
+use tree_collections::prelude::*;
 
 use rand::{rngs::StdRng, SeedableRng};
 use criterion::{BenchmarkId, criterion_group, criterion_main, Criterion};

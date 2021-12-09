@@ -1,7 +1,11 @@
-pub mod rbTree;
 pub mod avlTree;
+pub mod bsTree;
+pub mod commonTrait;
+pub mod rbTree;
 
 pub use crate::avlTree::AVLTree;
+// pub use crate::bsTree::BSTree;
+pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
 pub use crate::rbTree::RBTree;
 
 use std::io::{stdin, stdout, Write};
@@ -9,22 +13,24 @@ use std::io::{stdin, stdout, Write};
 pub fn get_user_input() -> String {
     let mut line = String::new();
     stdout().flush().expect("failed to flush");
-    stdin().read_line(&mut line).expect("failed to read from stdin");
+    stdin()
+        .read_line(&mut line)
+        .expect("failed to read from stdin");
     line.to_string()
 }
-pub fn get_val(op: &str)-> u32 {
+pub fn get_val(op: &str) -> u32 {
     loop {
         print!("{} value$ ", op);
         let value = get_user_input();
         let trimmed_val = value.trim();
-        match trimmed_val.parse::<u32>(){
+        match trimmed_val.parse::<u32>() {
             Ok(val) => {
                 println!("{} value '{}' in tree ... done!", op, val);
                 return val;
-            },
+            }
             Err(..) => {
                 println!("this was not an integer number");
-            },
+            }
         };
     }
 }
@@ -38,14 +44,14 @@ pub fn avl_promote() {
         let operation = get_user_input();
 
         match operation.to_lowercase().trim() {
-            "insert"  => {
+            "insert" => {
                 let val = get_val("insert");
                 tree.insert(val);
-            },
+            }
             "delete" => {
                 let val = get_val("delete");
                 tree.delete(val);
-            },
+            }
 
             "count" => println!("Number of leaves: {:?}", tree.count_leaves()),
 
@@ -81,10 +87,10 @@ fn rbt_promote() {
         let operation = get_user_input();
 
         match operation.to_lowercase().trim() {
-            "insert"  => {
+            "insert" => {
                 let val = get_val("insert");
                 tree.insert(val);
-            },
+            }
             "delete" => {
                 let val = get_val("delete");
                 tree.delete(val);
@@ -128,6 +134,6 @@ fn main() {
         },
         _ => {
             eprint!("Command not recognized. \n");
-        },
+        }
     }
 }
