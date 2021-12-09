@@ -1099,7 +1099,7 @@ fn main() {
     rb_tree.delete(6);
     rb_tree.delete(3);
     rb_tree.delete(8);
-    // rb_tree.delete(17);
+    rb_tree.delete(17);
     let temp = rb_tree.clone();
     match rb_tree.root.clone() {
         None => (),
