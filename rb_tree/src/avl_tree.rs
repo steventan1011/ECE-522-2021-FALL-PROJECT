@@ -70,6 +70,18 @@ impl TreeNode<u32> {
             Self::in_order_traversal(right.unwrap());
         }
     }
+
+    fn preorder_traversal(node: AVLTreeNode) {
+        print!("{:?} ", node.borrow().value);
+        let left = node.borrow().left.clone();
+        if left.is_some() {
+            Self::preorder_traversal(left.unwrap());
+        }
+        let right = node.borrow().right.clone();
+        if right.is_some() {
+            Self::preorder_traversal(right.unwrap());
+        }
+    }
 }
 
 struct AVLTree  {
@@ -105,6 +117,15 @@ impl AVLTree {
         match self.root.clone() {
             None => print!("the tree does not have node"),
             Some(root) => TreeNode::in_order_traversal(root),
+        }
+        println!()
+    }
+    // preorder traverse
+    fn preorder_traversal(&self) {
+        print!("Preorder traversal: ");
+        match self.root.clone() {
+            None => print!("the tree does not have node"),
+            Some(root) => TreeNode::preorder_traversal(root),
         }
         println!()
     }
@@ -445,18 +466,41 @@ fn main() {
     // avl_tree.delete(2); // 树里只剩3了，叶子数2，高度2正确
     // avl_tree.delete(3); //正确
 
-    avl_tree.insert(1);
-    avl_tree.insert(2);
+    // avl_tree.insert(1);
+    // avl_tree.insert(2);
+    // avl_tree.insert(3);
+    // avl_tree.insert(4);
+    // avl_tree.insert(5);
+
+    // avl_tree.delete(1);//正确
+    // avl_tree.delete(2); //正确
+    // avl_tree.delete(3); //树里剩4和5，叶子节点数应为3，得到2错误，高度3正确
+    // avl_tree.delete(4);//正确
+    // avl_tree.delete(5); // 0 0 true 正确
+
+    avl_tree.insert(16);
     avl_tree.insert(3);
-    avl_tree.insert(4);
-    avl_tree.insert(5);
+    avl_tree.insert(7);
+    avl_tree.insert(11);
+    avl_tree.insert(9);
+    avl_tree.insert(16);
+    avl_tree.insert(26);
+    avl_tree.insert(18);
+    avl_tree.insert(14);
+    avl_tree.insert(15);
 
-    avl_tree.delete(1);//正确
-    avl_tree.delete(2); //正确
-    avl_tree.delete(3); //树里剩4和5，叶子节点数应为3，得到2错误，高度3正确
-    avl_tree.delete(4);//正确
-    avl_tree.delete(5); // 0 0 true 正确
+    avl_tree.delete(16); //只有数叶子节点问题
+    avl_tree.delete(3); //只有数叶子节点问题
+    avl_tree.delete(7); //只有数叶子节点问题
+    avl_tree.delete(11); //只有数叶子节点问题
+    avl_tree.delete(9); //只有数叶子节点问题
+    avl_tree.delete(16); //重复删除不会有特殊提示，显示结果和删除9后一样
+    avl_tree.delete(26);
+    avl_tree.delete(18);
+    avl_tree.delete(14); //只有数叶子节点问题
+    avl_tree.delete(15);
 
+    avl_tree.preorder_traversal();
     avl_tree.in_order_traversal();
     println!("Count leaves: {:?}", avl_tree.count_leaves());
     println!("Height: {:?}", avl_tree.height());
@@ -464,6 +508,6 @@ fn main() {
 }
 
 // The functions that can be tested are insert() case LL, case RR, case LR, case RL, delete()
-// in_order_traversal(), height() and .is_tree_empty().
+// preorder_traversal(), in_order_traversal(), height() and .is_tree_empty().
 // When there are only two nodes in the tree, the number of leaf nodes should be 3 and count_leaves() returns 2.
 // In other cases count_leaves() is correct.
