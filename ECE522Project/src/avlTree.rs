@@ -7,7 +7,8 @@ use std::fmt;
 type AVLTreeNode = Rc<RefCell<TreeNode<u32>>>;
 type OptionAVLTreeNode = Option<AVLTreeNode>;
 
-struct TreeNode<T:fmt::Debug> {
+#[derive(Clone, Debug, PartialEq)]
+pub struct TreeNode<T:fmt::Debug> {
     pub value: T,
     left: OptionAVLTreeNode,
     right: OptionAVLTreeNode,
@@ -120,6 +121,18 @@ impl AVLTree {
         let right = node.borrow().right.clone();
         if right.is_some() {
             self.preorder_traverse(right.unwrap(), container);
+        }
+    }
+
+    pub fn in_order_traverse(&self, node: AVLTreeNode, container: &mut Vec<u32>) {
+        let left = node.borrow().left.clone();
+        if left.is_some() {
+            self.in_order_traverse(left.unwrap(), container);
+        }
+        container.push(node.borrow().value);
+        let right = node.borrow().right.clone();
+        if right.is_some() {
+            self.in_order_traverse(right.unwrap(), container);
         }
     }
 
@@ -381,24 +394,20 @@ impl AVLTree {
         self.get_left_height(n) as f64 - self.get_right_height(n) as f64
     }
 
-    // //Determine whether the tree is balanced
-    // fn is_balanced(&self) -> bool {
-    //     match self.get_root() {
-    //         Some(node) => self._is_balanced(node), // node类型错误
-    //         None => true,
-    //     }
-    // }
-
-    // // Determine whether the tree with node as root is balanced
-    // fn _is_balanced(&mut self, node: OptionAVLTreeNode) -> bool {
-    //     let mut balance_factor = self.get_balance_factor(&node.unwrap());
-    //     if balance_factor.abs() > 1.0 {
-    //         false
-    //     } else {
-    //         self._is_balanced(node.unwrap().borrow_mut().left.clone()) &&
-    //         self._is_balanced(node.unwrap().borrow_mut().right.clone())
-    //     }
-    // }
+    //Determine whether the tree is balanced
+    fn is_balanced(&self, node: OptionAVLTreeNode) -> bool {
+        match node {
+            Some(node) => {
+                if self.get_balance_factor(&node) <= 1.0 {
+                    self.is_balanced(node.borrow().left.clone()) && 
+                    self.is_balanced(node.borrow().right.clone())
+                } else {
+                    false
+                }
+            },
+            None => true,
+        }
+    }
 
     //                 y                                     x
     //               /    \                                 /   \
@@ -471,52 +480,35 @@ mod test {
             tree.insert(*v);
         });
         let root = tree.root.clone().unwrap();
-        let mut container = vec![];
-        tree.preorder_traverse()(root.clone(), &mut container);
-        println!("check tree  {:#?}", container);
-        assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
+        let mut pre_container = vec![];
+        let mut in_container = vec![];
+        tree.preorder_traverse(root.clone(), &mut pre_container);
+        tree.in_order_traverse(root.clone(), &mut in_container);
+        let is_balanced = tree.is_balanced(tree.root.clone());
+        println!("check {:#?}", in_container);
+        assert_eq!(pre_container, vec![20, 8, 0, 16, 24, 22]);
+        assert_eq!(in_container, vec![0, 8, 16, 20, 22, 24]);
+        assert_eq!(is_balanced, true);
         
-        // let mut container = vec![];
-        // RedBlackTreeNode::debug_preorder_traverse(root.clone(), &mut container);
-        // assert_eq!(container, vec![0, -16, 16, 8, 22, 20, 24]);
-
-        // let mut container = vec![];
-        // RedBlackTreeNode::postorder_traverse(root, &mut container);
-        // assert_eq!(container, vec![-16, 8, 20, 24, 22, 16, 0]);
     }
 
     #[test]
     fn test_insert() {
-        let mut rb_tree = RBTree::new();
-        rb_tree.insert(12);
-        rb_tree.insert(1);
-        rb_tree.insert(9);
-        rb_tree.insert(2);
-        rb_tree.insert(0);
-        rb_tree.insert(11);
-        rb_tree.insert(7);
-        rb_tree.insert(19);
-        rb_tree.insert(4);
-        rb_tree.insert(15);
-        rb_tree.insert(18);
-        rb_tree.insert(5);
-        rb_tree.insert(14);
-        rb_tree.insert(13);
-        rb_tree.insert(10);
-        rb_tree.insert(16);
-        rb_tree.insert(6);
-        rb_tree.insert(3);
-        rb_tree.insert(8);
-        rb_tree.insert(17);
+        let mut avl_tree = AVLTree::new();
+        avl_tree.insert(1);
+        avl_tree.insert(2);
+        avl_tree.insert(3);
+        avl_tree.insert(4);
+        avl_tree.insert(5);
 
-        let result = RBTree::is_valid_red_black_tree(rb_tree.root);
+        let result = avl_tree.is_balanced(avl_tree.root.clone());
         assert_eq!(result, true);
     }
 
     #[test]
     fn test_delete() {
          // Test the three different tree traversal functions.
-         let mut tree = RBTree::new();
+         let mut tree = AVLTree::new();
          tree.insert(0);
          vec![16, 8, 24, 20, 22].iter().for_each(|v| {
              tree.insert(*v);
@@ -525,11 +517,11 @@ mod test {
          let root = tree.root.clone().unwrap();
          tree.delete(16);
          let mut container = vec![];
-         tree.debug_preorder_traverse(root.clone(), &mut container);
-         let result = RBTree::is_valid_red_black_tree(tree.root);
+         tree.preorder_traverse(root.clone(), &mut container);
+         let result = tree.is_balanced(tree.root.clone());
          assert_eq!(result, true);
          
-        //  assert_eq!(container, vec![8, 0, 20, 24, 22]);
+         assert_eq!(container, vec![20, 8, 0, 24, 22]);
  
     }
 }
