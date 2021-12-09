@@ -1,5 +1,5 @@
 [package]
-name = "rb_tree"
+name = "ECE522Project"
 version = "0.1.0"
 edition = "2018"
 
