@@ -1,4 +1,4 @@
-use ECE522Project::prelude::*;
+use tree_collections::prelude::*;
 
 use rand::{rngs::StdRng, SeedableRng};
 use criterion::{BenchmarkId, criterion_group, criterion_main, Criterion};
