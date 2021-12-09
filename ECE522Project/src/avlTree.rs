@@ -4,20 +4,20 @@ use std::cmp::{max, Ordering};
 use std::io;
 use std::fmt;
 
-type AVLTreeNode = Rc<RefCell<TreeNode<u32>>>;
-type OptionAVLTreeNode = Option<AVLTreeNode>;
+type AVLTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
+type OptionAVLTreeNode<T> = Option<AVLTreeNode<T>>;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct TreeNode<T:fmt::Debug> {
+pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
     pub value: T,
-    left: OptionAVLTreeNode,
-    right: OptionAVLTreeNode,
+    left: OptionAVLTreeNode<T>,
+    right: OptionAVLTreeNode<T>,
     height: usize,
 }
 
-impl TreeNode<u32> {
+impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
     // Create a new node of type OptionAVLTreeNode
-    fn new(value: u32) -> OptionAVLTreeNode {
+    fn new(value: T) -> OptionAVLTreeNode<T> {
         Some(Rc::new(RefCell::new(Self {
             value,
             left: None,
@@ -26,18 +26,18 @@ impl TreeNode<u32> {
         })))
     }
 
-    fn get_left(&self) -> &OptionAVLTreeNode { return &self.left; }
-    fn get_right(&self) -> &OptionAVLTreeNode { return &self.right; }
-    fn get_data(&self) -> u32 { return self.value; }
+    fn get_left(&self) -> &OptionAVLTreeNode<T> { return &self.left; }
+    fn get_right(&self) -> &OptionAVLTreeNode<T> { return &self.right; }
+    fn get_data(&self) -> T { return self.value; }
 
-    fn min(&self) -> u32 {
+    fn min(&self) -> T {
         self.get_left().as_ref().map_or(
             self.get_data(),
             |x| x.borrow_mut().min()
         )
     }
 
-    fn count_leaves(node: AVLTreeNode) -> u32 {
+    fn count_leaves(node: AVLTreeNode<T>) -> u32 {
         let left = node.borrow().left.clone();
         let right = node.borrow().right.clone();
         if left.is_none() && right.is_none() {
@@ -52,7 +52,7 @@ impl TreeNode<u32> {
     }
 
     // Node有height属性，可以简化？
-    fn get_height(node: AVLTreeNode) -> u32 {
+    fn get_height(node: AVLTreeNode<T>) -> u32 {
         let left = node.borrow().left.clone();
         let right = node.borrow().right.clone();
         let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
@@ -60,7 +60,7 @@ impl TreeNode<u32> {
         return max(left_height, right_height) + 1;
     }
 
-    fn in_order_traversal(node: AVLTreeNode) {
+    fn in_order_traversal(node: AVLTreeNode<T>) {
         let left = node.borrow().left.clone();
         if left.is_some() {
             Self::in_order_traversal(left.unwrap());
@@ -72,7 +72,7 @@ impl TreeNode<u32> {
         }
     }
 
-    fn preorder_traversal(node: AVLTreeNode) {
+    fn preorder_traversal(node: AVLTreeNode<T>) {
         print!("{:?}", node.borrow().value);
         let left = node.borrow().left.clone();
         if left.is_some() {
@@ -85,11 +85,11 @@ impl TreeNode<u32> {
     }
 }
 
-pub struct AVLTree  {
-    root: OptionAVLTreeNode,
+pub struct AVLTree<T: Ord + Copy + fmt::Debug>  {
+    root: OptionAVLTreeNode<T>,
 }
 
-impl AVLTree {
+impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
     pub fn new() -> Self {
         Self {
             root: None,
@@ -112,7 +112,7 @@ impl AVLTree {
         }
     }
 
-    pub fn preorder_traverse(&self, node: AVLTreeNode, container: &mut Vec<u32>) {
+    pub fn preorder_traverse(&self, node: AVLTreeNode<T>, container: &mut Vec<T>) {
         container.push(node.borrow().value);
         let left = node.borrow().left.clone();
         if left.is_some() {
@@ -124,7 +124,7 @@ impl AVLTree {
         }
     }
 
-    pub fn in_order_traverse(&self, node: AVLTreeNode, container: &mut Vec<u32>) {
+    pub fn in_order_traverse(&self, node: AVLTreeNode<T>, container: &mut Vec<T>) {
         let left = node.borrow().left.clone();
         if left.is_some() {
             self.in_order_traverse(left.unwrap(), container);
@@ -161,7 +161,7 @@ impl AVLTree {
     }
 
 
-    pub fn insert(&mut self, insert_value: u32) {
+    pub fn insert(&mut self, insert_value: T) {
         let root = self.root.take();
         // TreeNode is type OptionAVLTreeNode, so the code is simplified.
         match root {
@@ -170,7 +170,7 @@ impl AVLTree {
         }
     }
 
-    fn node_insert(&mut self, node: OptionAVLTreeNode, insert_value: u32) -> OptionAVLTreeNode {
+    fn node_insert(&mut self, node: OptionAVLTreeNode<T>, insert_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
             Some(mut n) => {
                 let node_value = n.borrow().value;
@@ -233,7 +233,7 @@ impl AVLTree {
         Some(ret_node)
     }
 
-    pub fn delete(&mut self, delete_value: u32) {
+    pub fn delete(&mut self, delete_value: T) {
         let root = self.root.take();
         match root {
             None => return, // 这棵树是空的，没办法delete，所以什么都没发生??? 还是应该返回null？？？？？？？
@@ -242,7 +242,7 @@ impl AVLTree {
     }
 
     // delete node, return new root
-    fn node_delete(&mut self, node: OptionAVLTreeNode, delete_value: u32) -> OptionAVLTreeNode {
+    fn node_delete(&mut self, node: OptionAVLTreeNode<T>, delete_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
             // None => node.unwrap(), // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
             // Some(mut n) => {
@@ -336,17 +336,20 @@ impl AVLTree {
 
                 // maintain
                 // case LL: right rotate
-                if balance_factor > 1.0 && self.get_balance_factor(&n.borrow().left.clone().unwrap()) >= 0.0 {
+                if balance_factor > 1.0 && 
+                    self.get_balance_factor(&n.borrow().left.clone().unwrap()) >= 0.0 {
                     return Some(self.right_rotate(n))
                 }
 
                 // case RR: left rotate
-                if balance_factor < -1.0 && self.get_balance_factor(&n.borrow().right.clone().unwrap()) <= 0.0 {
+                if balance_factor < -1.0 && 
+                    self.get_balance_factor(&n.borrow().right.clone().unwrap()) <= 0.0 {
                     return Some(self.left_rotate(n))
                 }
 
                 // case LR: left rotate + right rotate
-                if balance_factor > 1.0 && self.get_balance_factor(&n.borrow().left.clone().unwrap()) < 0.0 {
+                if balance_factor > 1.0 && 
+                    self.get_balance_factor(&n.borrow().left.clone().unwrap()) < 0.0 {
                     // ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
                     // return Some(self.right_rotate(ret_node))
 
@@ -369,33 +372,33 @@ impl AVLTree {
         }
     }
 
-    pub fn min(&self) -> Option<u32> {
+    pub fn min(&self) -> Option<T> {
         match self.get_root() {
             None => None,
             Some(node) => Some(node.borrow().min()),
         }
     }
-    fn get_root(&self) -> &OptionAVLTreeNode { &self.root }
+    fn get_root(&self) -> &OptionAVLTreeNode<T> { &self.root }
 
 
-    fn get_height(&self, node: OptionAVLTreeNode) -> usize {
+    fn get_height(&self, node: OptionAVLTreeNode<T>) -> usize {
         // default height of an empty tree is 0
         node.map_or(0, |n| n.borrow().height)
     }
-    fn get_left_height(&self, n: &AVLTreeNode) -> usize {
+    fn get_left_height(&self, n: &AVLTreeNode<T>) -> usize {
         self.get_height(n.borrow().left.clone())
     }
 
-    fn get_right_height(&self, n: &AVLTreeNode) -> usize {
+    fn get_right_height(&self, n: &AVLTreeNode<T>) -> usize {
         self.get_height(n.borrow().right.clone())
     }
 
-    fn get_balance_factor(&self, n: &AVLTreeNode) -> f64 {
+    fn get_balance_factor(&self, n: &AVLTreeNode<T>) -> f64 {
         self.get_left_height(n) as f64 - self.get_right_height(n) as f64
     }
 
     //Determine whether the tree is balanced
-    fn is_balanced(&self, node: OptionAVLTreeNode) -> bool {
+    fn is_balanced(&self, node: OptionAVLTreeNode<T>) -> bool {
         match node {
             Some(node) => {
                 if self.get_balance_factor(&node) <= 1.0 {
@@ -416,7 +419,7 @@ impl AVLTree {
     //          z     T3             return x            T1 T2 T3 T4
     //         /   \
     //        T1   T2
-    fn right_rotate(&self, y: AVLTreeNode) -> AVLTreeNode {
+    fn right_rotate(&self, y: AVLTreeNode<T>) -> AVLTreeNode<T> {
         let mut x = y.borrow().left.clone().unwrap();
         let mut T3 = x.borrow().right.clone().take();
 
@@ -440,7 +443,7 @@ impl AVLTree {
     //                 T2     z        return x            T1 T2 T3 T4
     //                       /  \
     //                      T3   T4
-    fn left_rotate(&self, y: AVLTreeNode) -> AVLTreeNode {
+    fn left_rotate(&self, y: AVLTreeNode<T>) -> AVLTreeNode<T> {
         let mut x = y.borrow().right.clone().unwrap();
         // let mut T2 = x.borrow().left.clone().unwrap(); // 在这里会Panic，因为在21345情况下，4的左子树T2是none，这就和类型不对应了
         let mut T2 = x.borrow().left.clone().take(); // 这样T2是option类型就可以处理none的情况
