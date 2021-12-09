@@ -3,15 +3,6 @@ use std::cmp::max;
 use std::fmt;
 use std::rc::Rc;
 
-pub use crate::avlTree;
-pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum NodeColor {
-    Red,
-    Black,
-}
-
 #[derive(Clone, Debug, PartialEq)]
 enum NodeDirection {
     Left,
@@ -19,21 +10,19 @@ enum NodeDirection {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RBTree<T: Ord + Copy + fmt::Debug> {
+pub struct BSTree<T: Ord + Copy + fmt::Debug> {
     root: OptionRBTreeNode<T>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
-    color: NodeColor,
     value: T,
-    parent: OptionRBTreeNode<T>,
-    left: OptionRBTreeNode<T>,
-    right: OptionRBTreeNode<T>,
+    left: OptionBSTreeNode<T>,
+    right: OptionBSTreeNode<T>,
 }
 
-type RBTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
-type OptionRBTreeNode<T> = Option<RBTreeNode<T>>;
+type BSTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
+type OptionBSTreeNode<T> = Option<RBTreeNode<T>>;
 
 impl NodeColor {
     fn to_string(&self) -> &str {
@@ -42,26 +31,6 @@ impl NodeColor {
         } else {
             "b"
         }
-    }
-}
-
-// call common trait
-impl<T: Ord + Copy + fmt::Debug> CommonTreeTrait<T, TreeNode<T>> for RBTree<T> {
-    fn get_root(&self) -> OptionRBTreeNode<T> {
-        return self.root;
-    }
-}
-impl<T: Ord + Copy + fmt::Debug> CommonTreeNodeTrait<T> for TreeNode<T> {
-    fn get_left(&self) -> OptionRBTreeNode<T> {
-        return self.left;
-    }
-
-    fn get_right(&self) -> OptionRBTreeNode<T> {
-        return self.right;
-    }
-
-    fn get_value(&self) -> T {
-        return self.value;
     }
 }
 

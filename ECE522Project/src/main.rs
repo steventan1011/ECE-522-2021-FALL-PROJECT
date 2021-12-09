@@ -1,7 +1,9 @@
-pub mod rbTree;
 pub mod avlTree;
+pub mod bsTree;
+pub mod rbTree;
 
 pub use crate::avlTree::AVLTree;
+pub use crate::bsTree::BSTree;
 pub use crate::rbTree::RBTree;
 
 use std::io::{stdin, stdout, Write};
@@ -9,22 +11,24 @@ use std::io::{stdin, stdout, Write};
 pub fn get_user_input() -> String {
     let mut line = String::new();
     stdout().flush().expect("failed to flush");
-    stdin().read_line(&mut line).expect("failed to read from stdin");
+    stdin()
+        .read_line(&mut line)
+        .expect("failed to read from stdin");
     line.to_string()
 }
-pub fn get_val(op: &str)-> u32 {
+pub fn get_val(op: &str) -> u32 {
     loop {
         print!("{} value > ", op);
         let value = get_user_input();
         let trimmed_val = value.trim();
-        match trimmed_val.parse::<u32>(){
+        match trimmed_val.parse::<u32>() {
             Ok(val) => {
                 println!("{} value '{}' in tree ... done!", op, val);
                 return val;
-            },
+            }
             Err(..) => {
                 println!("this was not an integer number");
-            },
+            }
         };
     }
 }
@@ -39,14 +43,14 @@ pub fn avl_cli() {
         let operation = get_user_input();
 
         match operation.to_lowercase().trim() {
-            "insert"  => {
+            "insert" => {
                 let val = get_val("insert");
                 tree.insert(val);
-            },
+            }
             "delete" => {
                 let val = get_val("delete");
                 tree.delete(val);
-            },
+            }
 
             // "contain" | "search" => {
             //     let val = get_val("search");
@@ -61,7 +65,7 @@ pub fn avl_cli() {
                     None => println!("It is an empty tree!"),
                     Some(v) => println!("Minimum Value: {:?}", v),
                 }
-            },
+            }
             // "max" => {
             //     let max_val = tree.max();
             //     match max_val {
@@ -70,15 +74,16 @@ pub fn avl_cli() {
             //     }
             // },
             // "empty" => println!("Is the tree empty?: {:?}", tree.is_empty()),
-            "print" => {print!("Your tree: ");
-                tree.in_order_traversal();},
+            "print" => {
+                print!("Your tree: ");
+                tree.in_order_traversal();
+            }
             // "help" => list_of_operations(),
             "exit" => return,
             _ => println!("Command not recognized. Try 'help' for valid operations"),
         }
     }
 }
-
 
 fn rbt_cli() {
     println!("\n::...Red-Black Tree branch...::\n");
@@ -90,16 +95,18 @@ fn rbt_cli() {
         let operation = get_user_input();
 
         match operation.to_lowercase().trim() {
-            "insert"  => {
+            "insert" => {
                 let val = get_val("insert");
                 tree.insert(val);
-            },
+            }
             "delete" => {
                 let val = get_val("delete");
                 tree.delete(val);
-            },
-            "print" => {print!("Your tree: ");
-                tree.preorder_traverse_print();},
+            }
+            "print" => {
+                print!("Your tree: ");
+                tree.preorder_traversal();
+            }
             "exit" => return,
             _ => println!("Command not recognized. Try 'help' for valid operations"),
         }
@@ -116,12 +123,12 @@ fn main() {
     match selected_tree.to_lowercase().trim() {
         "avl" => {
             avl_cli();
-        },
+        }
         "rbt" => {
             rbt_cli();
-        },
+        }
         _ => {
             eprint!("Command not recognized. \n");
-        },
+        }
     }
 }
