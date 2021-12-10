@@ -603,8 +603,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use rand::seq::SliceRandom;
-    use rand::{rngs::StdRng, SeedableRng};
 
     #[test]
     fn tree_traversal() {
