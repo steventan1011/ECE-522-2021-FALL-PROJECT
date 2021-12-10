@@ -1,3 +1,7 @@
+//! AVL tree
+//!
+//! You can generate an AVL tree, and insert or delete nodes.
+
 use std::cell::RefCell;
 use std::cmp::{max, Ordering};
 use std::fmt;
@@ -9,6 +13,7 @@ pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
 type AVLTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
 type OptionAVLTreeNode<T> = Option<AVLTreeNode<T>>;
 
+/// Node struct for AVLTree
 #[derive(Clone, Debug, PartialEq)]
 pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
     pub value: T,
@@ -39,8 +44,9 @@ impl<T: Ord + Copy + fmt::Debug> CommonTreeNodeTrait<T> for TreeNode<T> {
     }
 }
 
+/// Implementations of AVLTreeNode
 impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
-    // Create a new node of type OptionAVLTreeNode
+    /// Create a new node of type OptionAVLTreeNode , which will be called by [AVLTree](struct.AVLTree.html)
     fn new(value: T) -> OptionAVLTreeNode<T> {
         Some(Rc::new(RefCell::new(Self {
             value,
@@ -53,70 +59,25 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
     fn get_data(&self) -> T {
         return self.value;
     }
-
-    // fn min(&self) -> T {
-    //     self.get_left()
-    //         .map_or(self.get_data(), |x| x.borrow_mut().min())
-    // }
-
-    // // Node有height属性，可以简化？
-    // fn get_height(node: AVLTreeNode<T>) -> u32 {
-    //     let left = node.borrow().left.clone();
-    //     let right = node.borrow().right.clone();
-    //     let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
-    //     let right_height = right.map(|r| Self::get_height(r.clone())).unwrap_or(1);
-    //     return max(left_height, right_height) + 1;
-    // }
-
-    // fn in_order_traversal(node: AVLTreeNode<T>) {
-    //     let left = node.borrow().left.clone();
-    //     if left.is_some() {
-    //         Self::in_order_traversal(left.unwrap());
-    //     }
-    //     print!("{:?} ", node.borrow().value);
-    //     let right = node.borrow().right.clone();
-    //     if right.is_some() {
-    //         Self::in_order_traversal(right.unwrap());
-    //     }
-    // }
-
-    // fn pre_order_traversal(node: AVLTreeNode<T>) {
-    //     print!("{:?}", node.borrow().value);
-    //     let left = node.borrow().left.clone();
-    //     if left.is_some() {
-    //         Self::pre_order_traversal(left.unwrap());
-    //     }
-    //     let right = node.borrow().right.clone();
-    //     if right.is_some() {
-    //         Self::pre_order_traversal(right.unwrap());
-    //     }
-    // }
 }
 
 pub struct AVLTree<T: Ord + Copy + fmt::Debug> {
     root: OptionAVLTreeNode<T>,
 }
 
+/// Implementations of AVLTree
 impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
+    /// Creates a new AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree: AVLTree<u32> = AVLTree::new();
+    /// ```
     pub fn new() -> Self {
         Self { root: None }
     }
-
-    // // count the leaves (None nodes)
-    // pub fn count_leaves(&self) -> u32 {
-    //     match self.root.clone() {
-    //         None => 0,
-    //         Some(node) => TreeNode::count_leaves(node),
-    //     }
-    // }
-
-    // // from root to leaves
-    // pub fn height(&self) -> u32 {
-    //     match self.root.clone() {
-    //         None => 0,
-    //         Some(node) => TreeNode::get_height(node),
-    //     }
-    // }
 
     pub fn preorder_traverse(&self, node: AVLTreeNode<T>, container: &mut Vec<T>) {
         container.push(node.borrow().value);
@@ -142,26 +103,18 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
-    // pub fn pre_order_traversal(&self) {
-    //     print!("Preorder traversal: ");
-    //     match self.root.clone() {
-    //         None => print!("the tree does not have node"),
-    //         Some(root) => TreeNode::pre_order_traversal(root),
-    //     }
-    //     println!();
-    // }
 
-    // // inorder traverse
-    // pub fn in_order_traversal(&self) {
-    //     print!("Inorder traversal: ");
-    //     match self.root.clone() {
-    //         None => print!("the tree does not have node"),
-    //         Some(root) => TreeNode::in_order_traversal(root),
-    //     }
-    //     println!()
-    // }
-
-    // judge if the tree is empty
+    /// Judge if the AVL tree is empty
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// println!("{}", avl_tree.is_tree_empty());  // true
+    /// avl_tree.insert(1);
+    /// println!("{}", avl_tree.is_tree_empty());  // false
+    /// ```
     pub fn is_tree_empty(&self) -> bool {
         self.root.clone().map(|_| false).unwrap_or(true)
     }
@@ -175,6 +128,8 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
+    /// Inserts a node, return a new root, which will be called by
+    /// [AVLTree.insert](struct.AVLTree.html#method.insert)
     fn node_insert(&mut self, node: OptionAVLTreeNode<T>, insert_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
             Some(mut n) => {
@@ -248,6 +203,16 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         Some(ret_node)
     }
 
+    /// Delete a value from AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// avl_tree.delete(1);
+    /// ```
     pub fn delete(&mut self, delete_value: T) {
         let root = self.root.take();
         match root {
@@ -255,7 +220,8 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
             Some(n) => self.root = self.node_delete(Some(n), delete_value),
         }
     }
-
+    /// Deletes a node, return a new root, which will be called by
+    /// [AVLTree.delete](struct.AVLTree.html#method.delete)
     // delete node, return new root
     fn node_delete(&mut self, node: OptionAVLTreeNode<T>, delete_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
@@ -429,6 +395,7 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
             None => true,
         }
     }
+
 
     //                 y                                     x
     //               /    \                                 /   \
