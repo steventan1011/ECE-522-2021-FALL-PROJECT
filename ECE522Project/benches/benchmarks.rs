@@ -19,11 +19,19 @@ fn benchmark_avl_insert(tree_size: u32) {
 }
 
 fn benchmark_rbt_insert(tree_size: u32) {
-    let mut rbt = RBTree::new();
+    let mut rbt = FastRBTree::new();
     for v in 0..tree_size {
         rbt.insert(v);
     }
 }
+
+// fn benchmark_bst_insert(tree_size: u32) {
+//     let mut avl = BSTree::new();
+//     for v in 0..tree_size {
+//         avl.insert(v);
+//     }
+// }
+
 
 fn benchmark_avl(tree_size: u32) {
     let mut avl = AVLTree::new();
@@ -36,7 +44,7 @@ fn benchmark_avl(tree_size: u32) {
 }
 
 fn benchmark_rbt(tree_size: u32) {
-    let mut rbt = RBTree::new();
+    let mut rbt = FastRBTree::new();
     for v in 0..tree_size {
         rbt.insert(v);
     }
@@ -45,41 +53,58 @@ fn benchmark_rbt(tree_size: u32) {
     }
 }
 
-fn benchmark_avl_insert_delete(tree_size: u32) {
-    let seed = [0u8; 32];
-    let mut rng: StdRng = SeedableRng::from_seed(seed);
-    let mut data: Vec<u32> = (0..tree_size).collect();
-    data.shuffle(&mut rng);
-    let sample = data.iter().choose_multiple(&mut rng, (tree_size / 10) as usize);
+// fn benchmark_avl_insert_delete(tree_size: u32) {
+//     let seed = [0u8; 32];
+//     let mut rng: StdRng = SeedableRng::from_seed(seed);
+//     let mut data: Vec<u32> = (0..tree_size).collect();
+//     data.shuffle(&mut rng);
+//     let sample = data.iter().choose_multiple(&mut rng, (tree_size / 100) as usize);
 
-    let mut avl = AVLTree::new();
-    for v in &data {
-        avl.insert(*v);
-    }
-    for v in sample.iter() {
-        avl.delete(**v);
-    }
-}
+//     let mut avl = AVLTree::new();
+//     for v in &data {
+//         avl.insert(*v);
+//     }
+//     for v in sample.iter() {
+//         avl.delete(**v);
+//     }
+// }
 
-fn benchmark_rbt_insert_delete(tree_size: u32) {
-    let seed = [0u8; 32];
-    let mut rng: StdRng = SeedableRng::from_seed(seed);
-    let mut data: Vec<u32> = (0..tree_size).collect();
-    data.shuffle(&mut rng);
-    let sample = data.iter().choose_multiple(&mut rng, (tree_size / 10) as usize);
+// fn benchmark_rbt_insert_delete(tree_size: u32) {
+//     let seed = [0u8; 32];
+//     let mut rng: StdRng = SeedableRng::from_seed(seed);
+//     let mut data: Vec<u32> = (0..tree_size).collect();
+//     data.shuffle(&mut rng);
+//     let sample = data.iter().choose_multiple(&mut rng, (tree_size / 100) as usize);
 
-    let mut rbt = RBTree::new();
-    for v in &data {
-        rbt.insert(*v);
-    }
+//     let mut rbt = RBTree::new();
+//     for v in &data {
+//         rbt.insert(*v);
+//     }
 
-    for v in sample.iter() {
-        rbt.delete(**v);
-    }
-}
+//     for v in sample.iter() {
+//         rbt.delete(**v);
+//     }
+// }
+
+// fn benchmark_bst_insert_delete(tree_size: u32) {
+//     let seed = [0u8; 32];
+//     let mut rng: StdRng = SeedableRng::from_seed(seed);
+//     let mut data: Vec<u32> = (0..tree_size).collect();
+//     data.shuffle(&mut rng);
+//     let sample = data.iter().choose_multiple(&mut rng, (tree_size / 100) as usize);
+
+//     let mut rbt = BSTree::new();
+//     for v in &data {
+//         rbt.insert(*v);
+//     }
+
+//     for v in sample.iter() {
+//         rbt.delete(**v);
+//     }
+// }
 
 fn bench_compare_insert(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Compare insert");
+    let mut group = c.benchmark_group("Insert");
     for (i, size) in TREE_SIZE.iter().enumerate() {
         group.bench_with_input(
             BenchmarkId::new("AVL", i), size,
@@ -96,7 +121,7 @@ fn bench_compare_insert(c: &mut Criterion) {
 }
 
 fn bench_compare_search_insert(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Compare search");
+    let mut group = c.benchmark_group("Search");
     
     for (i, size) in TREE_SIZE.iter().enumerate() {
         group.bench_with_input(
@@ -113,28 +138,28 @@ fn bench_compare_search_insert(c: &mut Criterion) {
     group.finish();
 }
 
-fn bench_compare_insert_delete(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Compare_insert_delete");
-    for (idx, size) in TREE_SIZE.iter().enumerate() {
-        group.bench_with_input(
-            BenchmarkId::new("AVL", idx), size,
-            |b, i| b.iter(|| benchmark_avl_insert_delete(*i))
-        );
-        group.bench_with_input(
-            BenchmarkId::new("RBT", idx), size,
-            |b, i| {
-                b.iter(|| benchmark_rbt_insert_delete(*i));
-            }
-        );
-    }
-    group.finish();
-}
+// fn bench_compare_insert_delete(c: &mut Criterion) {
+//     let mut group = c.benchmark_group("Insert_delete");
+//     for (i, size) in TREE_SIZE.iter().enumerate() {
+//         group.bench_with_input(
+//             BenchmarkId::new("AVL", i), size,
+//             |b, n| b.iter(|| benchmark_avl_insert_delete(*n))
+//         );
+//         group.bench_with_input(
+//             BenchmarkId::new("RBT", i), size,
+//             |b, n| {
+//                 b.iter(|| benchmark_rbt_insert_delete(*n));
+//             }
+//         );
+//     }
+//     group.finish();
+// }
 
 
 criterion_group!(
     benches,
     bench_compare_insert,
     bench_compare_search_insert,
-    bench_compare_insert_delete
+    // bench_compare_insert_delete
 );
 criterion_main!(benches);
