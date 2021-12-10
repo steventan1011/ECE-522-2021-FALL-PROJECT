@@ -31,7 +31,7 @@ fn benchmark_avl(tree_size: u32) {
         avl.insert(v);
     }
     for v in 0..tree_size / 10 {
-        // avl.contains(v);
+        avl.contains(v);
     }
 }
 

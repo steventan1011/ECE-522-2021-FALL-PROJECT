@@ -1,6 +1,6 @@
 # ECE-522-2021-FALL-PROJECT
 
-The purpose of this library is to provide APIs that allows users to create memory efficient red-black tree and avl tree. Besides, by using this library, users can investigate into the performace difference between red-black tree and avl tree, which helps them deeply understand the algorithms.
+The purpose of this library is to provide APIs that allows users to create memory efficient red-black tree and avl tree. Besides, by using this library, users can investigate the performance difference between red-black tree and avl tree, which helps them deeply understand the algorithms.
 
 ## Quick Start
 

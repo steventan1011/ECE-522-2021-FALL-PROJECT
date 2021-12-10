@@ -66,7 +66,7 @@ pub fn avl_promote() {
 
             "search" => {
                 let val = get_val("search");
-                // println!("values found? {:?}", tree.contains(val));
+                println!("values found? {:?}", tree.contains(val));
             },
 
             "print tree" => println!("Your tree: "),
