@@ -742,7 +742,7 @@ mod test {
         });
         let mut container = vec![];
         tree.pre_order_traversal_for_test(&mut container);
-        assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
+        assert_eq!(container, vec![20, 8, 0, 16, 24, 22]);
         // let mut container = vec![];
         // RedBlackTreeNode::debug_preorder_traverse(root.clone(), &mut container);
         // assert_eq!(container, vec![0, -16, 16, 8, 22, 20, 24]);
