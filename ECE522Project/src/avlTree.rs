@@ -132,7 +132,7 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
     /// [AVLTree.insert](struct.AVLTree.html#method.insert)
     fn node_insert(&mut self, node: OptionAVLTreeNode<T>, insert_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
-            Some(mut n) => {
+            Some(n) => {
                 let node_value = n.borrow().value;
                 if insert_value < node_value {
                     let left = n.borrow().left.clone();
@@ -155,12 +155,7 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
             + 1;
 
         // update balance factor
-        let mut balance_factor = self.get_balance_factor(&ret_node);
-        // if balance_factor.abs() > 1.0 {
-        //     println!("unbalanced: {}", balance_factor);
-        // }
-
-        //println!("insert node: {}", ret_node.borrow().value.clone());
+        let balance_factor = self.get_balance_factor(&ret_node);
 
         // maintain
         // case LL: right rotate
@@ -225,43 +220,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
     // delete node, return new root
     fn node_delete(&mut self, node: OptionAVLTreeNode<T>, delete_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
-            // None => node.unwrap(), // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
-            // Some(mut n) => {
-            //     let node_value = n.borrow().value;
-            //     if delete_value < node_value  { // look left
-            //         let left = n.borrow().left.clone();
-            //         n.borrow_mut().left = self.node_delete(left, delete_value);
-            //         n
-            //     }
-            //     else if delete_value > node_value { // look right
-            //         let right = n.borrow().right.clone();
-            //         n.borrow_mut().right = self.node_delete(right, delete_value);
-            //         n
-            //     }
-            //     else { // found the node which should be deleted
-            //         let left = n.borrow().left.clone();
-            //         let right = n.borrow().right.clone();
-            //         let ret = match (left.clone(), right.clone()) {
-            //             (None, Some(r)) => r,  // The left subtree of the node to be deleted is empty, r is new root
-            //             (Some(l), None) => l, // The right subtree of the node to be deleted is empty, l is new root
-            //
-            //             // 我想通过左子树为空/右子树为空/左右都不为空，这三种情况进行分类，但是缺少左右子树都为空
-            //             // 如果把(None, Some(r)) => r，改成(None, _) => right.unwrap()???，或者改成(_, Some(r)) => r???
-            //             (None, None) => None.unwrap(),
-            //
-            //             //The left and right subtrees of the node to be deleted(node n) are not empty.
-            //             // Find the smallest node A that is larger than the node n.
-            //             (Some(left), Some(right)) => {
-            //                 let min_value = right.borrow().min(); // Find the value of node A which is the minimum value of the right subtree
-            //                 n.borrow_mut().value = min_value; // Change the value of node n to the value of node A.
-            //                 let right = n.borrow().right.clone().take();
-            //                 n.borrow_mut().right = self.node_delete(right, min_value); // Delete the node A in the right subtree.
-            //                 n // return new root
-            //             },
-            //         };
-            //         ret
-            //     }
-            // },
             None => node, // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
             Some(mut n) => {
                 let node_value = n.borrow().value;
@@ -287,9 +245,9 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
                         // 如果把(None, Some(r)) => r，改成(None, _) => right.unwrap()???，或者改成(_, Some(r)) => r???
                         (None, None) => None,
 
-                        //The left and right subtrees of the node to be deleted(node n) are not empty.
+                        // The left and right subtrees of the node to be deleted(node n) are not empty.
                         // Find the smallest node A that is larger than the node n.
-                        (Some(left), Some(right)) => {
+                        (Some(_), Some(right)) => {
                             let min_value = right.borrow().get_min_value_in_children(); // Find the value of node A which is the minimum value of the right subtree
                             n.borrow_mut().value = min_value; // Change the value of node n to the value of node A.
                             let right = n.borrow().right.clone().take();
@@ -313,10 +271,7 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
                     + 1; // 把option类型的ret_node都改成了n
 
                 // update balance factor
-                let mut balance_factor = self.get_balance_factor(&n);
-                // if balance_factor.abs() > 1.0 {
-                //     println!("unbalanced: {}", balance_factor);
-                // }
+                let balance_factor = self.get_balance_factor(&n);
 
                 // maintain
                 // case LL: right rotate
@@ -337,9 +292,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
                 if balance_factor > 1.0
                     && self.get_balance_factor(&n.borrow().left.clone().unwrap()) < 0.0
                 {
-                    // ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
-                    // return Some(self.right_rotate(ret_node))
-
                     let left = n.borrow().left.clone().take().unwrap();
                     n.borrow_mut().left = Some(self.left_rotate(left));
                     return Some(self.right_rotate(n));
@@ -349,9 +301,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
                 if balance_factor < -1.0
                     && self.get_balance_factor(&n.borrow().right.clone().unwrap()) > 0.0
                 {
-                    // ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
-                    // return Some(self.left_rotate(ret_node))
-
                     let right = n.borrow().right.clone().take().unwrap();
                     n.borrow_mut().right = Some(self.right_rotate(right));
                     return Some(self.left_rotate(n));
@@ -361,9 +310,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
-    // fn get_root(&self) -> &OptionAVLTreeNode<T> {
-    //     &self.root
-    // }
 
     fn get_height(&self, node: OptionAVLTreeNode<T>) -> usize {
         // default height of an empty tree is 0
@@ -405,12 +351,12 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
     //         /   \
     //        T1   T2
     fn right_rotate(&self, y: AVLTreeNode<T>) -> AVLTreeNode<T> {
-        let mut x = y.borrow().left.clone().unwrap();
-        let mut T3 = x.borrow().right.clone().take();
+        let x = y.borrow().left.clone().unwrap();
+        let t_3 = x.borrow().right.clone().take();
 
         // right rotate
         x.borrow_mut().right = Some(y.clone());
-        y.borrow_mut().left = T3; // 借用了发生移动的y
+        y.borrow_mut().left = t_3; // 借用了发生移动的y
 
         // update height of x and y
         y.borrow_mut().height = self.get_left_height(&y).max(self.get_right_height(&y)) + 1;
@@ -427,14 +373,14 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
     //                       /  \
     //                      T3   T4
     fn left_rotate(&self, y: AVLTreeNode<T>) -> AVLTreeNode<T> {
-        let mut x = y.borrow().right.clone().unwrap();
+        let x = y.borrow().right.clone().unwrap();
         // let mut T2 = x.borrow().left.clone().unwrap(); // 在这里会Panic，因为在21345情况下，4的左子树T2是none，这就和类型不对应了
-        let mut T2 = x.borrow().left.clone().take(); // 这样T2是option类型就可以处理none的情况
+        let t_2 = x.borrow().left.clone().take(); // 这样T2是option类型就可以处理none的情况
 
         // left rotate
         x.borrow_mut().left = Some(y.clone());
         //y.borrow_mut().right = Some(T2); // 借用了发生移动的y
-        y.borrow_mut().right = T2;
+        y.borrow_mut().right = t_2;
 
         // update height of x and y
         y.borrow_mut().height = self.get_left_height(&y).max(self.get_right_height(&y)) + 1;
@@ -443,11 +389,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         return x;
     }
 }
-
-// The functions that can be tested are insert() case LL, case RR, case LR, case RL, delete()
-// in_order_traversal(), height() and .is_tree_empty().
-// When there are only two nodes in the tree, the number of leaf nodes should be 3 and count_leaves() returns 2.
-// In other cases count_leaves() is correct.
 
 #[cfg(test)]
 mod test {

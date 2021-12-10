@@ -511,18 +511,6 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                                 }
                             }
                         }
-
-                        // node.borrow_mut().value = left.borrow().value;
-                        // node.borrow_mut().left = left.borrow().left.clone();
-                        // node.borrow_mut().right = left.borrow().right.clone();
-                        // if node.borrow().left.is_some() {
-                        //     let left = node.borrow().left.clone().unwrap();
-                        //     left.borrow_mut().parent = Some(node.clone());
-                        // }
-                        // if node.borrow().right.is_some() {
-                        //     let right = node.borrow().right.clone().unwrap();
-                        //     right.borrow_mut().parent = Some(node.clone());
-                        // }
                     }
                     // 3.2 Black + right red case: current node is black and right child is red, left child is None
                     // delete the current black node and move the right child to the current node place
@@ -547,17 +535,6 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                                 }
                             }
                         }
-                        // node.borrow_mut().value = right.borrow().value;
-                        // node.borrow_mut().left = right.borrow().left.clone();
-                        // node.borrow_mut().right = right.borrow().right.clone();
-                        // if node.borrow().left.is_some() {
-                        //     let left = node.borrow().left.clone().unwrap();
-                        //     left.borrow_mut().parent = Some(node.clone());
-                        // }
-                        // if node.borrow().right.is_some() {
-                        //     let right = node.borrow().right.clone().unwrap();
-                        //     right.borrow_mut().parent = Some(node.clone());
-                        // }
                     }
                     // 4. Black + no children case: current node is black and has no children
                     else {
@@ -684,12 +661,6 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         let parent = node.borrow().parent.clone();
         let right = node.borrow().right.clone();
 
-        // println!(
-        //     "left ro start {} {:#?}",
-        //     node.clone().borrow().value,
-        //     node.clone().borrow().color
-        // );
-
         node.borrow_mut().right = right.clone().unwrap().borrow().left.clone();
         if node.borrow().right.is_some() {
             let right = node.borrow().right.clone().unwrap();
@@ -716,11 +687,6 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         let parent = node.borrow().parent.clone();
         let left = node.borrow().left.clone();
 
-        // println!(
-        //     "right ro start {} {:#?}",
-        //     node.clone().borrow().value,
-        //     node.clone().borrow().color
-        // );
         node.borrow_mut().left = left.clone().unwrap().borrow().right.clone();
         if node.borrow().left.is_some() {
             let left = node.borrow().left.clone().unwrap();
@@ -1013,10 +979,9 @@ mod test {
             tree.insert(*v);
         });
 
-        let root = tree.root.clone().unwrap();
         tree.delete(16);
         let mut container = vec![];
-        tree.debug_preorder_traverse(root.clone(), &mut container);
+        tree.pre_order_traversal_for_test(&mut container);
         let result = RBTree::is_valid_red_black_tree(tree.root);
         assert_eq!(result, true);
         //  assert_eq!(container, vec![8, 0, 20, 24, 22]);
