@@ -141,6 +141,36 @@ pub trait CommonTreeTrait<T: Ord + Copy + fmt::Debug, TreeNode: CommonTreeNodeTr
             Some(node) => node.borrow().contains(value),
         }
     }
+
+    // judge if the tree is empty
+    fn is_tree_empty(&self) -> bool {
+        self.get_root().map(|_| false).unwrap_or(true)
+    }
+
+    // judge if the tree is BST
+    // fn is_valid_bst(&self) -> bool {
+    //     match self.get_root() {
+    //         None => true,
+    //         Some(node) => {
+    //             node.is_valid_bst();
+    //             d
+    //         }
+    //     }
+    // }
+
+    fn min(&self) -> Option<T> {
+        match self.get_root() {
+            None => None,
+            Some(node) => Some(node.borrow().get_min_value_in_children()),
+        }
+    }
+
+    fn max(&self) -> Option<T> {
+        match self.get_root() {
+            None => None,
+            Some(node) => Some(node.borrow().get_max_value_in_children()),
+        }
+    }
 }
 
 /// Provide common functions for nodes
@@ -220,11 +250,11 @@ pub trait CommonTreeNodeTrait<T: Ord + Copy + fmt::Debug> {
         print!("{:?} ", self.get_value());
         let left = self.get_left();
         if left.is_some() {
-            left.unwrap().borrow().in_order_traversal();
+            left.unwrap().borrow().pre_order_traversal();
         }
         let right = self.get_right();
         if right.is_some() {
-            right.unwrap().borrow().in_order_traversal();
+            right.unwrap().borrow().pre_order_traversal();
         }
     }
 
@@ -258,5 +288,21 @@ pub trait CommonTreeNodeTrait<T: Ord + Copy + fmt::Debug> {
                 Some(node) => node.borrow().contains(value),
             }
         };
+    }
+
+    // find the min value in its children
+    fn get_min_value_in_children(&self) -> T {
+        match self.get_left() {
+            Some(left) => left.borrow().get_min_value_in_children(),
+            None => self.get_value(),
+        }
+    }
+
+    // find the max value in its children
+    fn get_max_value_in_children(&self) -> T {
+        match self.get_right() {
+            Some(right) => right.borrow().get_max_value_in_children(),
+            None => self.get_value(),
+        }
     }
 }
