@@ -1,3 +1,7 @@
+//! Binary search tree
+//!
+//! You can generate a binary search tree, and insert or delete nodes.
+
 use std::cell::RefCell;
 use std::cmp::max;
 use std::fmt;
@@ -11,11 +15,13 @@ enum NodeDirection {
     Right,
 }
 
+/// Structure of BSTree
 #[derive(Clone, Debug, PartialEq)]
 pub struct BSTree<T: Ord + Copy + fmt::Debug> {
     root: OptionBSTreeNode<T>,
 }
 
+/// Node struct for [BSTree](struct.BSTree.html) struct
 #[derive(Clone, Debug, PartialEq)]
 pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
     value: T,
@@ -25,6 +31,7 @@ pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
 
 type BSTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
 type OptionBSTreeNode<T> = Option<BSTreeNode<T>>;
+
 
 // extend from common tree trait
 impl<T: Ord + Copy + fmt::Debug> CommonTreeTrait<T, TreeNode<T>> for BSTree<T> {
@@ -226,115 +233,6 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    //     #[test]
-    //     fn test_rotation() {
-    //         let mut tree = BSTree::new();
-    //         tree.insert(30);
-    //         {
-    //             let root = tree.root.clone().unwrap();
-    //             root.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 20,
-    //                 Some(root.clone()),
-    //             ))));
-    //             root.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 40,
-    //                 Some(root.clone()),
-    //             ))));
-
-    //             let left = root.borrow().left.clone().unwrap();
-    //             left.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 10,
-    //                 Some(left.clone()),
-    //             ))));
-    //             left.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 25,
-    //                 Some(left.clone()),
-    //             ))));
-
-    //             let right = root.borrow().right.clone().unwrap();
-    //             right.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 35,
-    //                 Some(right.clone()),
-    //             ))));
-    //             right.borrow_mut().right = Some(Rc::new(RefCell::new(
-    //                 TreeNode::new_black_with_parent(50, Some(right.clone())),
-    //             )));
-    //         }
-    //         let mut after_left_rot = BSTree::new();
-    //         after_left_rot.insert(40);
-    //         {
-    //             let root = after_left_rot.root.clone().unwrap();
-    //             root.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 30,
-    //                 Some(root.clone()),
-    //             ))));
-
-    //             let left = root.borrow().left.clone().unwrap();
-    //             left.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 20,
-    //                 Some(left.clone()),
-    //             ))));
-    //             left.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 35,
-    //                 Some(left.clone()),
-    //             ))));
-
-    //             let left = left.borrow().left.clone().unwrap();
-    //             left.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 10,
-    //                 Some(left.clone()),
-    //             ))));
-    //             left.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 25,
-    //                 Some(root.clone()),
-    //             ))));
-
-    //             root.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new_black_with_parent(
-    //                 50,
-    //                 Some(root.clone()),
-    //             ))));
-    //         }
-    //         {
-    //             let root = tree.root.clone().unwrap();
-    //             TreeNode::left_rotate(root);
-    //         }
-    //         let mut tree_container = vec![];
-    //         let mut left_rotate_container = vec![];
-    //         let real_root = TreeNode::get_root(tree.root.clone().unwrap());
-    //         match real_root {
-    //             Some(rr) => tree.pre_order_traverse(rr.clone(), &mut tree_container),
-    //             None => tree.pre_order_traverse(tree.root.clone().unwrap(), &mut tree_container),
-    //         }
-    //         after_left_rot.pre_order_traverse(
-    //             after_left_rot.root.clone().unwrap(),
-    //             &mut left_rotate_container,
-    //         );
-
-    //         assert_eq!(tree_container, left_rotate_container);
-    //     }
-
-    //     #[test]
-    //     fn tree_traversal() {
-    //         // Test the three different tree traversal functions.
-    //         let mut tree = BSTree::new();
-    //         tree.insert(0);
-    //         vec![16, 16, 8, 24, 20, 22].iter().for_each(|v| {
-    //             tree.insert(*v);
-    //         });
-    //         let root = tree.root.clone().unwrap();
-    //         let mut container = vec![];
-    //         tree.pre_order_traverse(root.clone(), &mut container);
-    //         assert_eq!(container, vec![8, 0, 20, 16, 24, 22]);
-    //         // let mut container = vec![];
-    //         // RedBlackTreeNode::debug_preorder_traverse(root.clone(), &mut container);
-    //         // assert_eq!(container, vec![0, -16, 16, 8, 22, 20, 24]);
-
-    //         // let mut container = vec![];
-    //         // RedBlackTreeNode::postorder_traverse(root, &mut container);
-    //         // assert_eq!(container, vec![-16, 8, 20, 24, 22, 16, 0]);
-    //     }
-
     #[test]
     fn test_insert() {
         let mut bs_tree = BSTree::new();
@@ -346,6 +244,8 @@ mod test {
         bs_tree.insert(6);
         bs_tree.in_order_traversal();
         bs_tree.pre_order_traversal();
+
+
     }
 
     //     #[test]
