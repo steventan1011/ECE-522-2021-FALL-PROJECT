@@ -330,7 +330,7 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                                 let option_uncle = grand_parent.borrow().right.clone();
                                 if Self::get_color(option_uncle.clone()) == NodeColor::Black {
                                     // insert case 6.1: left left && uncle is None or black
-                                    println!("insert case 6.1: left left && uncle is None");
+                                    // println!("insert case 6.1: left left && uncle is None");
                                     Self::right_rotate(grand_parent.clone());
                                     let parent = node.borrow().parent.clone().unwrap();
                                     Self::set_black(parent.clone());
@@ -338,13 +338,13 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                                     Self::set_red(right.clone());
                                 } else {
                                     let uncle = option_uncle.clone().unwrap();
-                                    println!(
-                                        "===== uncle 161 at insert_maintain_rb {:#?}",
-                                        uncle.clone().borrow().value,
-                                    );
+                                    // println!(
+                                    //     "===== uncle 161 at insert_maintain_rb {:#?}",
+                                    //     uncle.clone().borrow().value,
+                                    // );
                                     if uncle.borrow().color == NodeColor::Red {
                                         // insert case 2: uncle is red
-                                        println!("insert case 2: uncle is red");
+                                        // println!("insert case 2: uncle is red");
                                         Self::set_black(parent.clone());
                                         Self::set_black(uncle.clone());
                                         Self::set_red(grand_parent.clone());
@@ -354,15 +354,15 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                             } else if Self::is_right(parent.clone()) && Self::is_right(node.clone())
                             {
                                 let option_uncle = grand_parent.borrow().left.clone();
-                                println!(
-                                    "===== else self.is_right(parent.clone()) && self.is_right(node.clone() {:#?} {:#?} {:#?}",
-                                    node.borrow().value,
-                                    parent.clone().borrow().value,
-                                    grand_parent.clone().borrow().value
-                                );
+                                // println!(
+                                //     "===== else self.is_right(parent.clone()) && self.is_right(node.clone() {:#?} {:#?} {:#?}",
+                                //     node.borrow().value,
+                                //     parent.clone().borrow().value,
+                                //     grand_parent.clone().borrow().value
+                                // );
                                 if Self::get_color(option_uncle.clone()) == NodeColor::Black {
                                     // insert case 6.2: right right && uncle is None or black
-                                    println!("insert case 6.2: right right && uncle is None");
+                                    // println!("insert case 6.2: right right && uncle is None");
                                     Self::left_rotate(grand_parent.clone());
                                     let parent = node.borrow().parent.clone().unwrap();
                                     Self::set_black(parent.clone());
@@ -370,12 +370,12 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                                     Self::set_red(left.clone());
                                 } else {
                                     let uncle = option_uncle.clone().unwrap();
-                                    println!(
-                                        "===== uncle 197 at insert_maintain_rb {:#?}",
-                                        uncle.clone().borrow().value,
-                                    );
+                                    // println!(
+                                    //     "===== uncle 197 at insert_maintain_rb {:#?}",
+                                    //     uncle.clone().borrow().value,
+                                    // );
                                     // insert case 2: uncle is red
-                                    println!("insert case 2: uncle is red");
+                                    // println!("insert case 2: uncle is red");
                                     Self::set_black(parent.clone());
                                     Self::set_black(uncle.clone());
                                     Self::set_red(grand_parent.clone());
@@ -386,24 +386,24 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                                 let option_uncle = grand_parent.borrow().right.clone();
                                 if Self::get_color(option_uncle.clone()) == NodeColor::Black {
                                     // insert case 5.1: left right  && uncle is None or black
-                                    println!("case 5.1: left right  && uncle is None");
-                                    println!(
-                                        "===== case 5.1: {:#?} {:#?} {:#?}",
-                                        node.borrow().value,
-                                        parent.clone().borrow().value,
-                                        grand_parent.clone().borrow().value
-                                    );
+                                    // println!("case 5.1: left right  && uncle is None");
+                                    // println!(
+                                    //     "===== case 5.1: {:#?} {:#?} {:#?}",
+                                    //     node.borrow().value,
+                                    //     parent.clone().borrow().value,
+                                    //     grand_parent.clone().borrow().value
+                                    // );
                                     Self::left_rotate(parent.clone());
                                     let left_child = node.borrow().left.clone().unwrap();
                                     Self::insert_maintain_rb(left_child.clone());
                                 } else {
                                     let uncle = option_uncle.clone().unwrap();
-                                    println!(
-                                        "===== uncle 237 at insert_maintain_rb {:#?}",
-                                        uncle.clone().borrow().value,
-                                    );
+                                    // println!(
+                                    //     "===== uncle 237 at insert_maintain_rb {:#?}",
+                                    //     uncle.clone().borrow().value,
+                                    // );
                                     // insert case 2: uncle is red
-                                    println!("insert case 2: uncle is red");
+                                    // println!("insert case 2: uncle is red");
                                     Self::set_black(parent.clone());
                                     Self::set_black(uncle.clone());
                                     Self::set_red(grand_parent.clone());
@@ -412,26 +412,26 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                             } else if Self::is_right(parent.clone()) && Self::is_left(node.clone())
                             {
                                 let option_uncle = grand_parent.borrow().left.clone();
-                                println!(
-                                    "===== else if self.is_right(parent.clone()) && self.is_left(node.clone() {:#?} {:#?} {:#?}",
-                                    node.borrow().value,
-                                    parent.clone().borrow().value,
-                                    grand_parent.borrow().value
-                                );
+                                // println!(
+                                //     "===== else if self.is_right(parent.clone()) && self.is_left(node.clone() {:#?} {:#?} {:#?}",
+                                //     node.borrow().value,
+                                //     parent.clone().borrow().value,
+                                //     grand_parent.borrow().value
+                                // );
                                 if Self::get_color(option_uncle.clone()) == NodeColor::Black {
                                     // insert case 5.2: right left && uncle is None or black
-                                    println!("insert case 5.2: right left && uncle is None");
+                                    // println!("insert case 5.2: right left && uncle is None");
                                     Self::right_rotate(parent.clone());
                                     let right_child = node.borrow().right.clone().unwrap();
                                     Self::insert_maintain_rb(right_child.clone());
                                 } else {
                                     let uncle = option_uncle.clone().unwrap();
-                                    println!(
-                                        "===== uncle 282 at insert_maintain_rb {:#?}",
-                                        uncle.clone().borrow().value,
-                                    );
+                                    // println!(
+                                    //     "===== uncle 282 at insert_maintain_rb {:#?}",
+                                    //     uncle.clone().borrow().value,
+                                    // );
                                     // insert case 2: uncle is red
-                                    println!("insert case 2: uncle is red");
+                                    // println!("insert case 2: uncle is red");
                                     Self::set_black(parent.clone());
                                     Self::set_black(uncle.clone());
                                     Self::set_red(grand_parent.clone());
