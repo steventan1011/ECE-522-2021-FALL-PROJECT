@@ -55,12 +55,31 @@ impl<T: Ord + Copy + fmt::Debug> CommonTreeNodeTrait<T> for TreeNode<T> {
     }
 }
 
+/// Implementations of BSTree
 // BSTree
 impl<T: Ord + Copy + fmt::Debug> BSTree<T> {
+
+    /// Create a new Binary Search Tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tree_collections::bsTree::BSTree;
+    /// let mut bst = BSTree::new();
+    /// ```
     pub fn new() -> Self {
         BSTree { root: None }
     }
 
+    /// Insert a new value to the BSTree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tree_collections::bsTree::BSTree;
+    /// let mut bst = BSTree::new();
+    /// bst.insert(1);
+    /// ```
     pub fn insert(&mut self, insert_value: T) {
         let root = self.get_root();
         match root {
@@ -69,6 +88,16 @@ impl<T: Ord + Copy + fmt::Debug> BSTree<T> {
         }
     }
 
+    /// Delete a value from the tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tree_collections::bsTree::BSTree;
+    /// let mut bst = BSTree::new();
+    /// bst.insert(1);
+    /// bst.delete(1);
+    /// ```
     pub fn delete(&mut self, delete_value: T) {
         let root = self.get_root();
         match root {
@@ -106,8 +135,12 @@ impl<T: Ord + Copy + fmt::Debug> BSTree<T> {
     }
 }
 
+/// Implementations of BSTree node
 // TreeNode
 impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
+
+    /// Create an new node, 
+    /// which will be called by [BSTree](struct.BSTree.html)
     fn new(value: T) -> Self {
         TreeNode {
             value: value,
@@ -116,6 +149,8 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         }
     }
 
+    /// Insert a node, which will be called by
+    /// [BSTree.insert](struct.BSTree.html#method.insert)
     fn node_insert(node: BSTreeNode<T>, insert_value: T) {
         if node.borrow().get_value() > insert_value {
             let left = node.borrow().left.clone();
@@ -137,7 +172,7 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
                 None => {
                     node.borrow_mut().right =
                         Some(Rc::new(RefCell::new(TreeNode::new(insert_value))));
-                    let right = node.borrow().get_right();
+                    let _right = node.borrow().get_right();
                 }
             }
         } else {
@@ -145,6 +180,7 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         }
     }
 
+    // Helper function for deleting
     fn node_delete_left(parent: BSTreeNode<T>, delete_value: T) {
         let curr_node = parent.borrow().get_left();
         match curr_node {
@@ -187,6 +223,7 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         }
     }
 
+    // Helper function for deleting
     fn node_delete_right(parent: BSTreeNode<T>, delete_value: T) {
         let curr_node = parent.borrow().get_right();
         match curr_node {
@@ -235,34 +272,32 @@ mod test {
     use super::*;
     #[test]
     fn test_insert() {
-        let mut bs_tree = BSTree::new();
-        bs_tree.insert(1);
-        bs_tree.insert(2);
-        bs_tree.insert(3);
-        bs_tree.insert(4);
-        bs_tree.insert(5);
-        bs_tree.insert(6);
-        bs_tree.in_order_traversal();
-        bs_tree.pre_order_traversal();
-
-
+        let mut tree = BSTree::new();
+        tree.insert(0);
+        vec![16, 16, 8, 24, 20, 22].iter().for_each(|v| {
+            tree.insert(*v);
+        });
+        let mut in_container = vec![];
+        let mut pre_container = vec![];
+        tree.in_order_traversal_for_test(&mut in_container);
+        tree.pre_order_traversal_for_test(&mut pre_container);
+        assert_eq!(in_container, vec![0, 8, 16, 20, 22, 24]);
+        assert_eq!(pre_container, vec![0, 16, 8, 24, 20, 22]);
     }
 
-    //     #[test]
-    //     fn test_delete() {
-    //         // Test the three different tree traversal functions.
-    //         let mut tree = BSTree::new();
-    //         tree.insert(0);
-    //         vec![16, 8, 24, 20, 22].iter().for_each(|v| {
-    //             tree.insert(*v);
-    //         });
-
-    //         let root = tree.root.clone().unwrap();
-    //         tree.delete(16);
-    //         let mut container = vec![];
-    //         tree.debug_preorder_traverse(root.clone(), &mut container);
-    //         let result = BSTree::is_valid_red_black_tree(tree.root);
-    //         assert_eq!(result, true);
-    //         //  assert_eq!(container, vec![8, 0, 20, 24, 22]);
-    //     }
+    #[test]
+    fn test_delete() {
+        let mut tree = BSTree::new();
+        tree.insert(0);
+        vec![16, 16, 8, 24, 20, 22].iter().for_each(|v| {
+            tree.insert(*v);
+        });
+        tree.delete(16);
+        let mut in_container = vec![];
+        let mut pre_container = vec![];
+        tree.in_order_traversal_for_test(&mut in_container);
+        tree.pre_order_traversal_for_test(&mut pre_container);
+        assert_eq!(in_container, vec![0, 8, 20, 22, 24]);
+        assert_eq!(pre_container, vec![0, 20, 8, 24, 22]);
+    }
 }
