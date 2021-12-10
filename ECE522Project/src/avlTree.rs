@@ -1,8 +1,10 @@
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::cmp::{max, Ordering};
-use std::io;
 use std::fmt;
+use std::io;
+use std::rc::Rc;
+
+pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
 
 type AVLTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
 type OptionAVLTreeNode<T> = Option<AVLTreeNode<T>>;
@@ -13,6 +15,28 @@ pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
     left: OptionAVLTreeNode<T>,
     right: OptionAVLTreeNode<T>,
     height: usize,
+}
+
+// extend from common tree trait
+impl<T: Ord + Copy + fmt::Debug> CommonTreeTrait<T, TreeNode<T>> for AVLTree<T> {
+    fn get_root(&self) -> OptionAVLTreeNode<T> {
+        return self.root.clone();
+    }
+}
+
+// extend from common tree node trait
+impl<T: Ord + Copy + fmt::Debug> CommonTreeNodeTrait<T> for TreeNode<T> {
+    fn get_left(&self) -> OptionAVLTreeNode<T> {
+        return self.left.clone();
+    }
+
+    fn get_right(&self) -> OptionAVLTreeNode<T> {
+        return self.right.clone();
+    }
+
+    fn get_value(&self) -> T {
+        return self.value;
+    }
 }
 
 impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
@@ -26,91 +50,73 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         })))
     }
 
-    fn get_left(&self) -> &OptionAVLTreeNode<T> { return &self.left; }
-    fn get_right(&self) -> &OptionAVLTreeNode<T> { return &self.right; }
-    fn get_data(&self) -> T { return self.value; }
-
-    fn min(&self) -> T {
-        self.get_left().as_ref().map_or(
-            self.get_data(),
-            |x| x.borrow_mut().min()
-        )
+    fn get_data(&self) -> T {
+        return self.value;
     }
 
-    fn count_leaves(node: AVLTreeNode<T>) -> u32 {
-        let left = node.borrow().left.clone();
-        let right = node.borrow().right.clone();
-        if left.is_none() && right.is_none() {
-            2
-        } else if left.is_none() && right.is_some() {
-            Self::count_leaves(right.clone().unwrap())
-        } else if left.is_some() && right.is_none() {
-            Self::count_leaves(left.clone().unwrap())
-        } else {
-            Self::count_leaves(left.clone().unwrap()) + Self::count_leaves(right.clone().unwrap())
-        }
-    }
+    // fn min(&self) -> T {
+    //     self.get_left()
+    //         .map_or(self.get_data(), |x| x.borrow_mut().min())
+    // }
 
-    // Node有height属性，可以简化？
-    fn get_height(node: AVLTreeNode<T>) -> u32 {
-        let left = node.borrow().left.clone();
-        let right = node.borrow().right.clone();
-        let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
-        let right_height = right.map(|r| Self::get_height(r.clone())).unwrap_or(1);
-        return max(left_height, right_height) + 1;
-    }
+    // // Node有height属性，可以简化？
+    // fn get_height(node: AVLTreeNode<T>) -> u32 {
+    //     let left = node.borrow().left.clone();
+    //     let right = node.borrow().right.clone();
+    //     let left_height = left.map(|l| Self::get_height(l.clone())).unwrap_or(1);
+    //     let right_height = right.map(|r| Self::get_height(r.clone())).unwrap_or(1);
+    //     return max(left_height, right_height) + 1;
+    // }
 
-    fn in_order_traversal(node: AVLTreeNode<T>) {
-        let left = node.borrow().left.clone();
-        if left.is_some() {
-            Self::in_order_traversal(left.unwrap());
-        }
-        print!("{:?} ", node.borrow().value);
-        let right = node.borrow().right.clone();
-        if right.is_some() {
-            Self::in_order_traversal(right.unwrap());
-        }
-    }
+    // fn in_order_traversal(node: AVLTreeNode<T>) {
+    //     let left = node.borrow().left.clone();
+    //     if left.is_some() {
+    //         Self::in_order_traversal(left.unwrap());
+    //     }
+    //     print!("{:?} ", node.borrow().value);
+    //     let right = node.borrow().right.clone();
+    //     if right.is_some() {
+    //         Self::in_order_traversal(right.unwrap());
+    //     }
+    // }
 
-    fn preorder_traversal(node: AVLTreeNode<T>) {
-        print!("{:?}", node.borrow().value);
-        let left = node.borrow().left.clone();
-        if left.is_some() {
-            Self::preorder_traversal(left.unwrap());
-        }
-        let right = node.borrow().right.clone();
-        if right.is_some() {
-            Self::preorder_traversal(right.unwrap());
-        }
-    }
+    // fn pre_order_traversal(node: AVLTreeNode<T>) {
+    //     print!("{:?}", node.borrow().value);
+    //     let left = node.borrow().left.clone();
+    //     if left.is_some() {
+    //         Self::pre_order_traversal(left.unwrap());
+    //     }
+    //     let right = node.borrow().right.clone();
+    //     if right.is_some() {
+    //         Self::pre_order_traversal(right.unwrap());
+    //     }
+    // }
 }
 
-pub struct AVLTree<T: Ord + Copy + fmt::Debug>  {
+pub struct AVLTree<T: Ord + Copy + fmt::Debug> {
     root: OptionAVLTreeNode<T>,
 }
 
 impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
     pub fn new() -> Self {
-        Self {
-            root: None,
-        }
+        Self { root: None }
     }
 
-    // count the leaves (None nodes)
-    pub fn count_leaves(&self) -> u32 {
-        match self.root.clone() {
-            None => 0,
-            Some(node) => TreeNode::count_leaves(node),
-        }
-    }
+    // // count the leaves (None nodes)
+    // pub fn count_leaves(&self) -> u32 {
+    //     match self.root.clone() {
+    //         None => 0,
+    //         Some(node) => TreeNode::count_leaves(node),
+    //     }
+    // }
 
-    // from root to leaves
-    pub fn height(&self) -> u32 {
-        match self.root.clone() {
-            None => 0,
-            Some(node) => TreeNode::get_height(node),
-        }
-    }
+    // // from root to leaves
+    // pub fn height(&self) -> u32 {
+    //     match self.root.clone() {
+    //         None => 0,
+    //         Some(node) => TreeNode::get_height(node),
+    //     }
+    // }
 
     pub fn preorder_traverse(&self, node: AVLTreeNode<T>, container: &mut Vec<T>) {
         container.push(node.borrow().value);
@@ -136,30 +142,29 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
-    pub fn preorder_traversal(&self) {
-        print!("Preorder traversal: ");
-        match self.root.clone() {
-            None => print!("the tree does not have node"),
-            Some(root) => TreeNode::preorder_traversal(root),
-        }
-        println!();
-    }
+    // pub fn pre_order_traversal(&self) {
+    //     print!("Preorder traversal: ");
+    //     match self.root.clone() {
+    //         None => print!("the tree does not have node"),
+    //         Some(root) => TreeNode::pre_order_traversal(root),
+    //     }
+    //     println!();
+    // }
 
-    // inorder traverse
-    pub fn in_order_traversal(&self) {
-        print!("Inorder traversal: ");
-        match self.root.clone() {
-            None => print!("the tree does not have node"),
-            Some(root) => TreeNode::in_order_traversal(root),
-        }
-        println!()
-    }
+    // // inorder traverse
+    // pub fn in_order_traversal(&self) {
+    //     print!("Inorder traversal: ");
+    //     match self.root.clone() {
+    //         None => print!("the tree does not have node"),
+    //         Some(root) => TreeNode::in_order_traversal(root),
+    //     }
+    //     println!()
+    // }
 
     // judge if the tree is empty
     pub fn is_tree_empty(&self) -> bool {
         self.root.clone().map(|_| false).unwrap_or(true)
     }
-
 
     pub fn insert(&mut self, insert_value: T) {
         let root = self.root.take();
@@ -174,7 +179,7 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         let ret_node = match node {
             Some(mut n) => {
                 let node_value = n.borrow().value;
-                if insert_value < node_value  {
+                if insert_value < node_value {
                     let left = n.borrow().left.clone();
                     n.borrow_mut().left = self.node_insert(left, insert_value);
                 } else if insert_value > node_value {
@@ -189,8 +194,10 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         };
 
         // update height
-        ret_node.borrow_mut().height = self.get_left_height(&ret_node)
-            .max(self.get_right_height(&ret_node)) + 1;
+        ret_node.borrow_mut().height = self
+            .get_left_height(&ret_node)
+            .max(self.get_right_height(&ret_node))
+            + 1;
 
         // update balance factor
         let mut balance_factor = self.get_balance_factor(&ret_node);
@@ -202,33 +209,41 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
 
         // maintain
         // case LL: right rotate
-        if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) >= 0.0 {
-            return Some(self.right_rotate(ret_node))
+        if balance_factor > 1.0
+            && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) >= 0.0
+        {
+            return Some(self.right_rotate(ret_node));
         }
 
         // case RR: left rotate
-        if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) <= 0.0 {
-            return Some(self.left_rotate(ret_node))
+        if balance_factor < -1.0
+            && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) <= 0.0
+        {
+            return Some(self.left_rotate(ret_node));
         }
 
         // case LR: left rotate + right rotate
-        if balance_factor > 1.0 && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) < 0.0 {
+        if balance_factor > 1.0
+            && self.get_balance_factor(&ret_node.borrow().left.clone().unwrap()) < 0.0
+        {
             // ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
             // return Some(self.right_rotate(ret_node))
 
             let left = ret_node.borrow().left.clone().take().unwrap();
             ret_node.borrow_mut().left = Some(self.left_rotate(left));
-            return Some(self.right_rotate(ret_node))
+            return Some(self.right_rotate(ret_node));
         }
 
         // case RL: right rotate + left rotate
-        if balance_factor < -1.0 && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) > 0.0 {
+        if balance_factor < -1.0
+            && self.get_balance_factor(&ret_node.borrow().right.clone().unwrap()) > 0.0
+        {
             // ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
             // return Some(self.left_rotate(ret_node))
 
             let right = ret_node.borrow().right.clone().take().unwrap();
             ret_node.borrow_mut().right = Some(self.right_rotate(right));
-            return Some(self.left_rotate(ret_node))
+            return Some(self.left_rotate(ret_node));
         }
         Some(ret_node)
     }
@@ -284,21 +299,22 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
             None => node, // 遍历到叶子节点，但是还是没有找到，所以应该返回null，还是说因为叶子节点就是null，所以返回node就可以？？？
             Some(mut n) => {
                 let node_value = n.borrow().value;
-                if delete_value < node_value  { // look left
+                if delete_value < node_value {
+                    // look left
                     let left = n.borrow().left.clone();
                     n.borrow_mut().left = self.node_delete(left, delete_value);
                     Some(n) // 返回option
-                }
-                else if delete_value > node_value { // look right
+                } else if delete_value > node_value {
+                    // look right
                     let right = n.borrow().right.clone();
                     n.borrow_mut().right = self.node_delete(right, delete_value);
                     Some(n) // 返回option
-                }
-                else { // found the node which should be deleted
+                } else {
+                    // found the node which should be deleted
                     let left = n.borrow().left.clone();
                     let right = n.borrow().right.clone();
                     let ret = match (left.clone(), right.clone()) {
-                        (None, Some(r)) => Some(r),  // The left subtree of the node to be deleted is empty, r is new root
+                        (None, Some(r)) => Some(r), // The left subtree of the node to be deleted is empty, r is new root
                         (Some(l), None) => Some(l), // The right subtree of the node to be deleted is empty, l is new root
 
                         // 我想通过左子树为空/右子树为空/左右都不为空，这三种情况进行分类，但是缺少左右子树都为空
@@ -308,16 +324,16 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
                         //The left and right subtrees of the node to be deleted(node n) are not empty.
                         // Find the smallest node A that is larger than the node n.
                         (Some(left), Some(right)) => {
-                            let min_value = right.borrow().min(); // Find the value of node A which is the minimum value of the right subtree
+                            let min_value = right.borrow().get_min_value_in_children(); // Find the value of node A which is the minimum value of the right subtree
                             n.borrow_mut().value = min_value; // Change the value of node n to the value of node A.
                             let right = n.borrow().right.clone().take();
                             n.borrow_mut().right = self.node_delete(right, min_value); // Delete the node A in the right subtree.
                             Some(n) // return new root
-                        },
+                        }
                     };
                     ret // 返回option
                 }
-            },
+            }
         };
 
         // update and maintain
@@ -325,8 +341,10 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
             None => ret_node,
             Some(n) => {
                 // update height
-                n.borrow_mut().height = self.get_left_height(&n) // 借用了发生移动的
-                    .max(self.get_right_height(&n)) + 1; // 把option类型的ret_node都改成了n
+                n.borrow_mut().height = self
+                    .get_left_height(&n) // 借用了发生移动的
+                    .max(self.get_right_height(&n))
+                    + 1; // 把option类型的ret_node都改成了n
 
                 // update balance factor
                 let mut balance_factor = self.get_balance_factor(&n);
@@ -336,50 +354,50 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
 
                 // maintain
                 // case LL: right rotate
-                if balance_factor > 1.0 && 
-                    self.get_balance_factor(&n.borrow().left.clone().unwrap()) >= 0.0 {
-                    return Some(self.right_rotate(n))
+                if balance_factor > 1.0
+                    && self.get_balance_factor(&n.borrow().left.clone().unwrap()) >= 0.0
+                {
+                    return Some(self.right_rotate(n));
                 }
 
                 // case RR: left rotate
-                if balance_factor < -1.0 && 
-                    self.get_balance_factor(&n.borrow().right.clone().unwrap()) <= 0.0 {
-                    return Some(self.left_rotate(n))
+                if balance_factor < -1.0
+                    && self.get_balance_factor(&n.borrow().right.clone().unwrap()) <= 0.0
+                {
+                    return Some(self.left_rotate(n));
                 }
 
                 // case LR: left rotate + right rotate
-                if balance_factor > 1.0 && 
-                    self.get_balance_factor(&n.borrow().left.clone().unwrap()) < 0.0 {
+                if balance_factor > 1.0
+                    && self.get_balance_factor(&n.borrow().left.clone().unwrap()) < 0.0
+                {
                     // ret_node.borrow_mut().left = Some(self.left_rotate(ret_node.borrow_mut().left.clone().unwrap())); // 发生移动
                     // return Some(self.right_rotate(ret_node))
 
                     let left = n.borrow().left.clone().take().unwrap();
                     n.borrow_mut().left = Some(self.left_rotate(left));
-                    return Some(self.right_rotate(n))
+                    return Some(self.right_rotate(n));
                 }
 
                 // case RL: right rotate + left rotate
-                if balance_factor < -1.0 && self.get_balance_factor(&n.borrow().right.clone().unwrap()) > 0.0 {
+                if balance_factor < -1.0
+                    && self.get_balance_factor(&n.borrow().right.clone().unwrap()) > 0.0
+                {
                     // ret_node.borrow_mut().right = Some(self.right_rotate(ret_node.borrow_mut().right.clone().unwrap())); // 发生移动
                     // return Some(self.left_rotate(ret_node))
 
                     let right = n.borrow().right.clone().take().unwrap();
                     n.borrow_mut().right = Some(self.right_rotate(right));
-                    return Some(self.left_rotate(n))
+                    return Some(self.left_rotate(n));
                 }
                 Some(n)
             }
         }
     }
 
-    pub fn min(&self) -> Option<T> {
-        match self.get_root() {
-            None => None,
-            Some(node) => Some(node.borrow().min()),
-        }
-    }
-    fn get_root(&self) -> &OptionAVLTreeNode<T> { &self.root }
-
+    // fn get_root(&self) -> &OptionAVLTreeNode<T> {
+    //     &self.root
+    // }
 
     fn get_height(&self, node: OptionAVLTreeNode<T>) -> usize {
         // default height of an empty tree is 0
@@ -402,12 +420,12 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         match node {
             Some(node) => {
                 if self.get_balance_factor(&node) <= 1.0 {
-                    self.is_balanced(node.borrow().left.clone()) && 
-                    self.is_balanced(node.borrow().right.clone())
+                    self.is_balanced(node.borrow().left.clone())
+                        && self.is_balanced(node.borrow().right.clone())
                 } else {
                     false
                 }
-            },
+            }
             None => true,
         }
     }
@@ -428,12 +446,10 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         y.borrow_mut().left = T3; // 借用了发生移动的y
 
         // update height of x and y
-        y.borrow_mut().height = self.get_left_height(&y)
-            .max(self.get_right_height(&y)) + 1;
-        x.borrow_mut().height = self.get_left_height(&x)
-            .max(self.get_right_height(&x)) + 1;
+        y.borrow_mut().height = self.get_left_height(&y).max(self.get_right_height(&y)) + 1;
+        x.borrow_mut().height = self.get_left_height(&x).max(self.get_right_height(&x)) + 1;
 
-        return x
+        return x;
     }
 
     //                 y                                        x
@@ -454,12 +470,10 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         y.borrow_mut().right = T2;
 
         // update height of x and y
-        y.borrow_mut().height = self.get_left_height(&y)
-            .max(self.get_right_height(&y)) + 1;
-        x.borrow_mut().height = self.get_left_height(&x)
-            .max(self.get_right_height(&x)) + 1;
+        y.borrow_mut().height = self.get_left_height(&y).max(self.get_right_height(&y)) + 1;
+        x.borrow_mut().height = self.get_left_height(&x).max(self.get_right_height(&x)) + 1;
 
-        return x
+        return x;
     }
 }
 
@@ -471,8 +485,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use rand::seq::SliceRandom;
-    use rand::{rngs::StdRng, SeedableRng};
 
     #[test]
     fn tree_traversal() {
@@ -492,7 +504,6 @@ mod test {
         assert_eq!(pre_container, vec![20, 8, 0, 16, 24, 22]);
         assert_eq!(in_container, vec![0, 8, 16, 20, 22, 24]);
         assert_eq!(is_balanced, true);
-        
     }
 
     #[test]
@@ -510,21 +521,20 @@ mod test {
 
     #[test]
     fn test_delete() {
-         // Test the three different tree traversal functions.
-         let mut tree = AVLTree::new();
-         tree.insert(0);
-         vec![16, 8, 24, 20, 22].iter().for_each(|v| {
-             tree.insert(*v);
-         });
-         
-         let root = tree.root.clone().unwrap();
-         tree.delete(16);
-         let mut container = vec![];
-         tree.preorder_traverse(root.clone(), &mut container);
-         let result = tree.is_balanced(tree.root.clone());
-         assert_eq!(result, true);
-         
-         assert_eq!(container, vec![20, 8, 0, 24, 22]);
- 
+        // Test the three different tree traversal functions.
+        let mut tree = AVLTree::new();
+        tree.insert(0);
+        vec![16, 8, 24, 20, 22].iter().for_each(|v| {
+            tree.insert(*v);
+        });
+
+        let root = tree.root.clone().unwrap();
+        tree.delete(16);
+        let mut container = vec![];
+        tree.preorder_traverse(root.clone(), &mut container);
+        let result = tree.is_balanced(tree.root.clone());
+        assert_eq!(result, true);
+
+        assert_eq!(container, vec![20, 8, 0, 24, 22]);
     }
 }

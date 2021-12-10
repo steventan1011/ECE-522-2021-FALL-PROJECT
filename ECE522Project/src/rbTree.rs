@@ -3,7 +3,6 @@ use std::cmp::max;
 use std::fmt;
 use std::rc::Rc;
 
-// pub mod commonTrait;
 pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -75,13 +74,11 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
 
     pub fn insert(&mut self, insert_value: T) {
         let root = self.root.clone();
-        match root {
-            None => {
-                self.root = Some(TreeNode::set_black(Rc::new(RefCell::new(TreeNode::new(
-                    insert_value,
-                )))))
-            }
-            Some(root) => self.root = TreeNode::node_insert(root, insert_value),
+        self.root = match root {
+            None => Some(TreeNode::set_black(Rc::new(RefCell::new(TreeNode::new(
+                insert_value,
+            ))))),
+            Some(root) => TreeNode::node_insert(root, insert_value),
         }
     }
 
@@ -142,11 +139,6 @@ impl<T: Ord + Copy + fmt::Debug> RBTree<T> {
     //     }
     //     println!()
     // }
-
-    // judge if the tree is empty
-    pub fn is_tree_empty(&self) -> bool {
-        self.root.clone().map(|_| false).unwrap_or(true)
-    }
 
     // 下面这三个之后会不要，用上面的in_order_traversal
     pub fn debug_preorder_traverse(&self, node: RBTreeNode<T>, container: &mut Vec<T>) {
@@ -466,7 +458,7 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
             // delete the min value of right in the right tree
             // the goal is to make the problem to be the case where current node has only one child
             if left.is_some() && right.is_some() {
-                let min_of_right = Self::get_min_value_in_children(right.clone().unwrap());
+                let min_of_right = right.clone().unwrap().borrow().get_min_value_in_children();
                 node.borrow_mut().value = min_of_right;
                 Self::node_delete(right.unwrap(), min_of_right);
             }
@@ -772,22 +764,6 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
             node.borrow_mut().color = NodeColor::Black;
         } else {
             node.borrow_mut().color = NodeColor::Red;
-        }
-    }
-
-    // find the min value in its children
-    fn get_min_value_in_children(node: RBTreeNode<T>) -> T {
-        match node.borrow().left.clone() {
-            Some(left) => Self::get_min_value_in_children(left),
-            None => node.borrow().value.clone(),
-        }
-    }
-
-    // find the max value in its children
-    fn get_max_value_in_children(node: RBTreeNode<T>) -> T {
-        match node.borrow().right.clone() {
-            Some(right) => Self::get_max_value_in_children(right),
-            None => node.borrow().value.clone(),
         }
     }
 
