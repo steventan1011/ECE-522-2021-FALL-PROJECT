@@ -1,3 +1,7 @@
+//! AVL tree
+//!
+//! You can generate an AVL tree, and insert or delete nodes.
+
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::cmp::{max, Ordering};
@@ -7,6 +11,7 @@ use std::fmt;
 type AVLTreeNode<T> = Rc<RefCell<TreeNode<T>>>;
 type OptionAVLTreeNode<T> = Option<AVLTreeNode<T>>;
 
+/// Node struct for AVLTree
 #[derive(Clone, Debug, PartialEq)]
 pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
     pub value: T,
@@ -15,8 +20,9 @@ pub struct TreeNode<T: Ord + Copy + fmt::Debug> {
     height: usize,
 }
 
+/// Implementations of AVLTreeNode
 impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
-    // Create a new node of type OptionAVLTreeNode
+    /// Create a new node of type OptionAVLTreeNode , which will be called by [AVLTree](struct.AVLTree.html)
     fn new(value: T) -> OptionAVLTreeNode<T> {
         Some(Rc::new(RefCell::new(Self {
             value,
@@ -25,11 +31,13 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
             height: 1, // default height of a new node is 1，which is a leave
         })))
     }
-
+    
     fn get_left(&self) -> &OptionAVLTreeNode<T> { return &self.left; }
     fn get_right(&self) -> &OptionAVLTreeNode<T> { return &self.right; }
     fn get_data(&self) -> T { return self.value; }
 
+    /// Return the minimum value of current node, which will be called by
+    /// [AVLTree.min](struct.AVLTree.html#method.min)
     fn min(&self) -> T {
         self.get_left().as_ref().map_or(
             self.get_data(),
@@ -37,6 +45,8 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         )
     }
 
+    /// Return the leaves number of current node, which will be called by
+    /// [AVLTree.count_leaves](struct.AVLTree.html#method.count_leaves)
     fn count_leaves(node: AVLTreeNode<T>) -> u32 {
         let left = node.borrow().left.clone();
         let right = node.borrow().right.clone();
@@ -51,6 +61,8 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         }
     }
 
+    /// Return the height of current node, which will be called by
+    /// [AVLTree.height](struct.AVLTree.html#method.height)
     // Node有height属性，可以简化？
     fn get_height(node: AVLTreeNode<T>) -> u32 {
         let left = node.borrow().left.clone();
@@ -60,6 +72,8 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         return max(left_height, right_height) + 1;
     }
 
+    /// Print nodes inorder, which will be called by
+    /// [AVLTree.in_order_traversal](struct.AVLTree.html#method.in_order_traversal)
     fn in_order_traversal(node: AVLTreeNode<T>) {
         let left = node.borrow().left.clone();
         if left.is_some() {
@@ -72,31 +86,59 @@ impl<T: Ord + Copy + fmt::Debug> TreeNode<T> {
         }
     }
 
-    fn preorder_traversal(node: AVLTreeNode<T>) {
+    /// Print nodes preorder, which will be called by
+    /// [AVLTree.preorder_traversal_print](struct.AVLTree.html#method.preorder_traversal_print)
+    fn preorder_traversal_print(node: AVLTreeNode<T>) {
         print!("{:?}", node.borrow().value);
         let left = node.borrow().left.clone();
         if left.is_some() {
-            Self::preorder_traversal(left.unwrap());
+            Self::preorder_traversal_print(left.unwrap());
         }
         let right = node.borrow().right.clone();
         if right.is_some() {
-            Self::preorder_traversal(right.unwrap());
+            Self::preorder_traversal_print(right.unwrap());
         }
     }
 }
 
+/// Structure of AVLTree
 pub struct AVLTree<T: Ord + Copy + fmt::Debug>  {
     root: OptionAVLTreeNode<T>,
 }
 
+/// Implementations of AVLTree
 impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
+    /// Creates a new AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree: AVLTree<u32> = AVLTree::new();
+    /// ```
     pub fn new() -> Self {
         Self {
             root: None,
         }
     }
 
-    // count the leaves (None nodes)
+    /// Counts leaves(None nodes) of AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// println!("{}", avl_tree.count_leaves());  // 2
+    /// avl_tree.insert(2);
+    /// println!("{}", avl_tree.count_leaves());  // 3
+    /// avl_tree.insert(3);
+    /// println!("{}", avl_tree.count_leaves());  // 4
+    ///
+    /// let mut leaf_number = avl_tree.count_leaves();
+    /// assert_eq!(4, leaf_number);
+    /// ```
     pub fn count_leaves(&self) -> u32 {
         match self.root.clone() {
             None => 0,
@@ -104,7 +146,19 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
-    // from root to leaves
+    /// Gets height of AVL tree (from root to leaves)
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// assert_eq!(0, avl_tree.height());
+    /// avl_tree.insert(1);
+    /// assert_eq!(2, avl_tree.height());
+    ///avl_tree.insert(2);
+    /// assert_eq!(3, avl_tree.height());
+    /// ```
     pub fn height(&self) -> u32 {
         match self.root.clone() {
             None => 0,
@@ -136,15 +190,20 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
-    pub fn preorder_traversal(&self) {
-        print!("Preorder traversal: ");
-        match self.root.clone() {
-            None => print!("the tree does not have node"),
-            Some(root) => TreeNode::preorder_traversal(root),
-        }
-        println!();
-    }
-
+    /// Prints AVL tree inorder
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// avl_tree.insert(3);
+    /// avl_tree.insert(5);
+    /// avl_tree.insert(2);
+    /// avl_tree.insert(4);
+    /// avl_tree.in_order_traversal(); // Inorder traversal: 1 2 3 4 5
+    ///
     // inorder traverse
     pub fn in_order_traversal(&self) {
         print!("Inorder traversal: ");
@@ -155,12 +214,55 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         println!()
     }
 
-    // judge if the tree is empty
+    /// Prints AVL tree preorder
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// avl_tree.insert(3);
+    /// avl_tree.insert(5);
+    /// avl_tree.insert(2);
+    /// avl_tree.insert(4);
+    /// avl_tree.preorder_traversal(); // Preorder traversal: 3 1 2 5 4
+    ///
+    pub fn preorder_traversal(&self) {
+        print!("Preorder traversal: ");
+        match self.root.clone() {
+            None => print!("the tree does not have node"),
+            Some(root) => TreeNode::preorder_traversal_print(root),
+        }
+        println!()
+    }
+
+
+    /// Judge if the AVL tree is empty
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// println!("{}", avl_tree.is_tree_empty());  // true
+    /// avl_tree.insert(1);
+    /// println!("{}", avl_tree.is_tree_empty());  // false
+    /// ```
     pub fn is_tree_empty(&self) -> bool {
         self.root.clone().map(|_| false).unwrap_or(true)
     }
 
 
+    /// Inserts a new value to AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// ```
     pub fn insert(&mut self, insert_value: T) {
         let root = self.root.take();
         // TreeNode is type OptionAVLTreeNode, so the code is simplified.
@@ -170,6 +272,8 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
+    /// Inserts a node, return a new root, which will be called by
+    /// [AVLTree.insert](struct.AVLTree.html#method.insert)
     fn node_insert(&mut self, node: OptionAVLTreeNode<T>, insert_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
             Some(mut n) => {
@@ -233,6 +337,16 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         Some(ret_node)
     }
 
+    /// Delete a value from AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree; 
+    /// let mut avl_tree = AVLTree::new();
+    /// avl_tree.insert(1);
+    /// avl_tree.delete(1);
+    /// ```
     pub fn delete(&mut self, delete_value: T) {
         let root = self.root.take();
         match root {
@@ -240,7 +354,8 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
             Some(n) => self.root = self.node_delete(Some(n), delete_value),
         }
     }
-
+    /// Deletes a node, return a new root, which will be called by
+    /// [AVLTree.delete](struct.AVLTree.html#method.delete)
     // delete node, return new root
     fn node_delete(&mut self, node: OptionAVLTreeNode<T>, delete_value: T) -> OptionAVLTreeNode<T> {
         let ret_node = match node {
@@ -372,14 +487,30 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
         }
     }
 
+    /// Return the minimum value of AVL tree
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ECE522Project::avlTree::AVLTree;
+    /// let mut avl_tree = AVLTree::new();
+    /// println!("{:?}", avl_tree.min()); // None
+    /// avl_tree.insert(1);
+    /// avl_tree.insert(3);
+    /// avl_tree.insert(5);
+    /// avl_tree.insert(2);
+    /// avl_tree.insert(4);
+    /// println!("{:?}", avl_tree.min()); // Some(1)
+    /// ```
     pub fn min(&self) -> Option<T> {
         match self.get_root() {
             None => None,
             Some(node) => Some(node.borrow().min()),
         }
     }
-    fn get_root(&self) -> &OptionAVLTreeNode<T> { &self.root }
 
+    // Helper functions
+    fn get_root(&self) -> &OptionAVLTreeNode<T> { &self.root }
 
     fn get_height(&self, node: OptionAVLTreeNode<T>) -> usize {
         // default height of an empty tree is 0
@@ -411,6 +542,7 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
             None => true,
         }
     }
+
 
     //                 y                                     x
     //               /    \                                 /   \
@@ -471,8 +603,6 @@ impl<T: Ord + Copy + fmt::Debug> AVLTree<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use rand::seq::SliceRandom;
-    use rand::{rngs::StdRng, SeedableRng};
 
     #[test]
     fn tree_traversal() {

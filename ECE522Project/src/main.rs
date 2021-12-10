@@ -1,12 +1,4 @@
-pub mod avlTree;
-pub mod bsTree;
-pub mod commonTrait;
-pub mod rbTree;
-
-pub use crate::avlTree::AVLTree;
-// pub use crate::bsTree::BSTree;
-pub use crate::commonTrait::{CommonTreeNodeTrait, CommonTreeTrait};
-pub use crate::rbTree::RBTree;
+use tree_collections::prelude::*;
 
 use std::io::{stdin, stdout, Write};
 
@@ -37,7 +29,7 @@ pub fn get_val(op: &str) -> u32 {
 
 pub fn avl_promote() {
     println!("\n::--------------AVL Tree--------------::\n");
-    let mut tree = AVLTree::new();
+    let mut tree: AVLTree<u32> = AVLTree::new();
 
     loop {
         print!("operation$ ");
@@ -46,11 +38,19 @@ pub fn avl_promote() {
         match operation.to_lowercase().trim() {
             "insert" => {
                 let val = get_val("insert");
-                tree.insert(val);
+                // if tree.contains(val) {
+                //     println!("This value already exists");
+                // } else {
+                //     tree.insert(val);
+                // }
             }
             "delete" => {
                 let val = get_val("delete");
-                tree.delete(val);
+                // if tree.contains(val) {
+                //     tree.delete(val);
+                // } else {
+                //     println!("This value does not exist");
+                // }
             }
 
             "count" => println!("Number of leaves: {:?}", tree.count_leaves()),
@@ -89,11 +89,19 @@ fn rbt_promote() {
         match operation.to_lowercase().trim() {
             "insert" => {
                 let val = get_val("insert");
-                tree.insert(val);
+                if tree.contains(val) {
+                    println!("This value already exists");
+                } else {
+                    tree.insert(val);
+                }
             }
             "delete" => {
                 let val = get_val("delete");
-                tree.delete(val);
+                if tree.contains(val) {
+                    tree.delete(val);
+                } else {
+                    println!("This value does not exist");
+                }
             },
             "count" => println!("Number of leaves: {:?}", tree.count_leaves()),
 
@@ -108,7 +116,7 @@ fn rbt_promote() {
 
             "search" => {
                 let val = get_val("search");
-                // println!("values found? {:?}", tree.contains(val));
+                println!("values found? {:?}", tree.contains(val));
             },
 
             "print tree" => println!("Your tree: "),
